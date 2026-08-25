@@ -12,26 +12,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-
       - name: Descargar proyecto
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Configurar Java 17
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
 
       - name: Configurar Android
-        uses: android-actions/setup-android@v4
+        uses: android-actions/setup-android@v3
 
       - name: Instalar SDK Android
+        shell: bash
         run: |
           yes | sdkmanager --licenses || true
           sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
 
       - name: Instalar Gradle
-        uses: gradle/actions/setup-gradle@v6
+        uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.10.2'
 
@@ -39,107 +39,49 @@ jobs:
         shell: bash
         run: |
           ZIP=$(find . -maxdepth 1 -type f -name "*.zip" | head -1)
-
-          if [ -z "$ZIP" ]; then
-            echo "ERROR: No se encontró ningún archivo ZIP."
-            exit 1
-          fi
-
-          echo "ZIP encontrado: $ZIP"
-
+          test -n "$ZIP"
           rm -rf proyecto
           mkdir -p proyecto
-
           unzip -q "$ZIP" -d proyecto
-
-          echo "Proyecto extraído correctamente."
 
       - name: Localizar proyecto Android
         shell: bash
         run: |
-          ROOT=$(find proyecto -type f \( \
-            -name "settings.gradle" \
-            -o -name "settings.gradle.kts" \
-          \) -print -quit | xargs -r dirname)
-
-          if [ -z "$ROOT" ]; then
-            echo "ERROR: No se encontró un proyecto Android."
-            echo "Contenido encontrado:"
-            find proyecto -maxdepth 3 -type f | head -100
-            exit 1
-          fi
-
+          ROOT=$(find proyecto -type f \( -name "settings.gradle" -o -name "settings.gradle.kts" \) -print -quit | xargs -r dirname)
+          test -n "$ROOT"
           echo "PROJECT_ROOT=$ROOT" >> "$GITHUB_ENV"
-
-          echo "Proyecto Android encontrado en:"
-          echo "$ROOT"
+          echo "Proyecto encontrado en: $ROOT"
 
       - name: Verificar Java
+        shell: bash
         run: |
           java -version
           javac -version
-          gradle --version
 
       - name: Forzar Java 17 en Gradle
         shell: bash
         run: |
-          cat > fix.gradle <<'EOF'
+          cat > "$PROJECT_ROOT/fix.gradle" <<'EOF'
           allprojects {
-            afterEvaluate {
-
               tasks.withType(JavaCompile).configureEach {
-                sourceCompatibility = "17"
-                targetCompatibility = "17"
-                options.release.set(17)
+                  sourceCompatibility = "17"
+                  targetCompatibility = "17"
               }
-
-              tasks.matching {
-                it.name.toLowerCase().contains("kotlin")
-              }.configureEach {
-                try {
-                  kotlinOptions.jvmTarget = "17"
-                } catch (Exception ignored) {
-                }
-
-                try {
-                  compilerOptions.jvmTarget.set(
-                    org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
-                  )
-                } catch (Exception ignored) {
-                }
-              }
-            }
           }
           EOF
-
-          echo "Archivo fix.gradle creado correctamente."
 
       - name: Compilar APK
         shell: bash
         run: |
           cd "$PROJECT_ROOT"
-
-          echo "Compilando desde:"
-          pwd
-
-          echo "Usando Java:"
-          java -version
-
-          gradle \
-            --no-daemon \
-            --stacktrace \
-            -I "$GITHUB_WORKSPACE/fix.gradle" \
+          gradle --no-daemon \
+            -I "$GITHUB_WORKSPACE/$PROJECT_ROOT/fix.gradle" \
             :app:assembleDebug
 
       - name: Buscar APK
         shell: bash
         run: |
-          echo "Buscando APK generado..."
-
-          find "$PROJECT_ROOT" \
-            -type f \
-            -name "*.apk" \
-            -print
+          find "$PROJECT_ROOT" -type f -name "*.apk" -print
 
       - name: Guardar APK
         uses: actions/upload-artifact@v4

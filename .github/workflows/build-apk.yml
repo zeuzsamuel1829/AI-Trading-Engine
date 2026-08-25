@@ -101,13 +101,15 @@ jobs:
           }
           EOF
 
-      - name: Forzar propiedad JVM
-        shell: bash
-        run: |
+           - name: Configurar Gradle y AndroidX
+           shell: bash
+           run: |
           cat > "$PROJECT_ROOT/gradle.properties" <<'EOF'
           org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
           kotlin.jvm.target.validation.mode=error
-          EOF
+          android.useAndroidX=true
+          android.enableJetifier=true
+          EOF 
 
       - name: Compilar APK
         shell: bash

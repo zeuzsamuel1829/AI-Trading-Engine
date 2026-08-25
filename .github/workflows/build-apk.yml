@@ -35,18 +35,30 @@ jobs:
       - name: Extraer proyecto
         run: |
           ZIP=$(find . -maxdepth 1 -type f -name "*.zip" | head -1)
-          mkdir proyecto
+          mkdir -p proyecto
           unzip -q "$ZIP" -d proyecto
 
       - name: Localizar proyecto Android
         run: |
-          ROOT=$(find proyecto -name settings.gradle.kts -printf '%h\n' | head -1)
+          ROOT=$(find proyecto -type f \( -name "settings.gradle" -o -name "settings.gradle.kts" \) -print -quit | xargs dirname)
           echo "PROJECT_ROOT=$ROOT" >> "$GITHUB_ENV"
+          echo "Proyecto encontrado en: $ROOT"
+
+      - name: Ajustar compatibilidad Java
+        run: |
+          cat > fix.gradle <<'EOF'
+          gradle.beforeProject { project ->
+              project.tasks.withType(org.gradle.api.tasks.compile.JavaCompile).configureEach {
+                  sourceCompatibility = "17"
+                  targetCompatibility = "17"
+              }
+          }
+          EOF
 
       - name: Compilar APK
         run: |
           cd "$PROJECT_ROOT"
-          gradle --no-daemon :app:assembleDebug
+          gradle --no-daemon -I "$GITHUB_WORKSPACE/fix.gradle" :app:assembleDebug
 
       - name: Guardar APK
         uses: actions/upload-artifact@v4

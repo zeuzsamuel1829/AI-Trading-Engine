@@ -1,0 +1,55 @@
+name: Build AI Trading Engine APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["principal", "main"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar proyecto
+        uses: actions/checkout@v4
+
+      - name: Configurar Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Configurar Android
+        uses: android-actions/setup-android@v3
+
+      - name: Instalar SDK Android
+        run: |
+          yes | sdkmanager --licenses || true
+          sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+
+      - name: Instalar Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.10.2"
+
+      - name: Extraer proyecto
+        run: |
+          ZIP=$(find . -maxdepth 1 -type f -name "*.zip" | head -1)
+          mkdir proyecto
+          unzip -q "$ZIP" -d proyecto
+
+      - name: Localizar proyecto Android
+        run: |
+          ROOT=$(find proyecto -name settings.gradle.kts -printf '%h\n' | head -1)
+          echo "PROJECT_ROOT=$ROOT" >> "$GITHUB_ENV"
+
+      - name: Compilar APK
+        run: |
+          cd "$PROJECT_ROOT"
+          gradle --no-daemon :app:assembleDebug
+
+      - name: Guardar APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: AI-Trading-Engine-APK
+          path: ${{ env.PROJECT_ROOT }}/app/build/outputs/apk/debug/app-debug.apk

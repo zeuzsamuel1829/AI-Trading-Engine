@@ -3,24 +3,27 @@ name: Build AI Trading Engine APK
 on:
   workflow_dispatch:
   push:
-    branches: ["principal", "main"]
+    branches:
+      - principal
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Descargar proyecto
-        uses: actions/checkout@v4
 
-      - name: Configurar Java
-        uses: actions/setup-java@v4
+      - name: Descargar proyecto
+        uses: actions/checkout@v6
+
+      - name: Configurar Java 17
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: "17"
+          java-version: '17'
 
       - name: Configurar Android
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@v4
 
       - name: Instalar SDK Android
         run: |
@@ -28,40 +31,119 @@ jobs:
           sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
 
       - name: Instalar Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v6
         with:
-          gradle-version: "8.10.2"
+          gradle-version: '8.10.2'
 
       - name: Extraer proyecto
+        shell: bash
         run: |
           ZIP=$(find . -maxdepth 1 -type f -name "*.zip" | head -1)
+
+          if [ -z "$ZIP" ]; then
+            echo "ERROR: No se encontró ningún archivo ZIP."
+            exit 1
+          fi
+
+          echo "ZIP encontrado: $ZIP"
+
+          rm -rf proyecto
           mkdir -p proyecto
+
           unzip -q "$ZIP" -d proyecto
 
-      - name: Localizar proyecto Android
-        run: |
-          ROOT=$(find proyecto -type f \( -name "settings.gradle" -o -name "settings.gradle.kts" \) -print -quit | xargs dirname)
-          echo "PROJECT_ROOT=$ROOT" >> "$GITHUB_ENV"
-          echo "Proyecto encontrado en: $ROOT"
+          echo "Proyecto extraído correctamente."
 
-      - name: Ajustar compatibilidad Java
+      - name: Localizar proyecto Android
+        shell: bash
+        run: |
+          ROOT=$(find proyecto -type f \( \
+            -name "settings.gradle" \
+            -o -name "settings.gradle.kts" \
+          \) -print -quit | xargs -r dirname)
+
+          if [ -z "$ROOT" ]; then
+            echo "ERROR: No se encontró un proyecto Android."
+            echo "Contenido encontrado:"
+            find proyecto -maxdepth 3 -type f | head -100
+            exit 1
+          fi
+
+          echo "PROJECT_ROOT=$ROOT" >> "$GITHUB_ENV"
+
+          echo "Proyecto Android encontrado en:"
+          echo "$ROOT"
+
+      - name: Verificar Java
+        run: |
+          java -version
+          javac -version
+          gradle --version
+
+      - name: Forzar Java 17 en Gradle
+        shell: bash
         run: |
           cat > fix.gradle <<'EOF'
           allprojects {
-            tasks.withType(JavaCompile).configureEach {
-              sourceCompatibility = "17"
-              targetCompatibility = "17"
+            afterEvaluate {
+
+              tasks.withType(JavaCompile).configureEach {
+                sourceCompatibility = "17"
+                targetCompatibility = "17"
+                options.release.set(17)
+              }
+
+              tasks.matching {
+                it.name.toLowerCase().contains("kotlin")
+              }.configureEach {
+                try {
+                  kotlinOptions.jvmTarget = "17"
+                } catch (Exception ignored) {
+                }
+
+                try {
+                  compilerOptions.jvmTarget.set(
+                    org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+                  )
+                } catch (Exception ignored) {
+                }
+              }
             }
           }
           EOF
 
+          echo "Archivo fix.gradle creado correctamente."
+
       - name: Compilar APK
+        shell: bash
         run: |
           cd "$PROJECT_ROOT"
-          gradle --no-daemon -I "$GITHUB_WORKSPACE/fix.gradle" :app:assembleDebug
+
+          echo "Compilando desde:"
+          pwd
+
+          echo "Usando Java:"
+          java -version
+
+          gradle \
+            --no-daemon \
+            --stacktrace \
+            -I "$GITHUB_WORKSPACE/fix.gradle" \
+            :app:assembleDebug
+
+      - name: Buscar APK
+        shell: bash
+        run: |
+          echo "Buscando APK generado..."
+
+          find "$PROJECT_ROOT" \
+            -type f \
+            -name "*.apk" \
+            -print
 
       - name: Guardar APK
         uses: actions/upload-artifact@v4
         with:
           name: AI-Trading-Engine-APK
           path: ${{ env.PROJECT_ROOT }}/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error

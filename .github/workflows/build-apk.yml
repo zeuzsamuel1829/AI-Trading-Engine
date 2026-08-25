@@ -12,6 +12,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+
       - name: Descargar proyecto
         uses: actions/checkout@v4
 
@@ -54,62 +55,49 @@ jobs:
         run: |
           ROOT=$(find proyecto -type f \
             \( -name "settings.gradle" -o -name "settings.gradle.kts" \) \
-            -print -quit | xargs -r dirname)
+            -print -quit)
 
           if [ -z "$ROOT" ]; then
             echo "ERROR: No se encontró settings.gradle."
             exit 1
           fi
 
+          ROOT=$(dirname "$ROOT")
+
           echo "PROJECT_ROOT=$ROOT" >> "$GITHUB_ENV"
           echo "Proyecto encontrado en: $ROOT"
 
+      - name: Configurar AndroidX
+        shell: bash
+        run: |
+          touch "$PROJECT_ROOT/gradle.properties"
+
+          grep -q '^android.useAndroidX=' "$PROJECT_ROOT/gradle.properties" \
+            || echo 'android.useAndroidX=true' >> "$PROJECT_ROOT/gradle.properties"
+
+          grep -q '^android.enableJetifier=' "$PROJECT_ROOT/gradle.properties" \
+            || echo 'android.enableJetifier=true' >> "$PROJECT_ROOT/gradle.properties"
+
+          grep -q '^org.gradle.jvmargs=' "$PROJECT_ROOT/gradle.properties" \
+            || echo 'org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8' >> "$PROJECT_ROOT/gradle.properties"
+
       - name: Verificar Java
+        shell: bash
         run: |
           java -version
           javac -version
 
-      - name: Forzar Java y Kotlin a JVM 17
+      - name: Configurar JVM 17
         shell: bash
         run: |
           cat > "$GITHUB_WORKSPACE/force-java17.gradle" <<'EOF'
           allprojects {
-              afterEvaluate {
-                  tasks.withType(JavaCompile).configureEach {
-                      sourceCompatibility = "17"
-                      targetCompatibility = "17"
-                  }
-
-                  tasks.matching {
-                      it.name.toLowerCase().contains("kotlin")
-                  }.configureEach {
-                      try {
-                          kotlinOptions.jvmTarget = "17"
-                      } catch (Exception ignored) {
-                      }
-                  }
-
-                  if (project.hasProperty("android")) {
-                      android {
-                          compileOptions {
-                              sourceCompatibility JavaVersion.VERSION_17
-                              targetCompatibility JavaVersion.VERSION_17
-                          }
-                      }
-                  }
+              tasks.withType(JavaCompile).configureEach {
+                  sourceCompatibility = "17"
+                  targetCompatibility = "17"
               }
           }
           EOF
-
-           - name: Configurar Gradle y AndroidX
-           shell: bash
-           run: |
-          cat > "$PROJECT_ROOT/gradle.properties" <<'EOF'
-          org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
-          kotlin.jvm.target.validation.mode=error
-          android.useAndroidX=true
-          android.enableJetifier=true
-          EOF 
 
       - name: Compilar APK
         shell: bash
@@ -124,7 +112,6 @@ jobs:
       - name: Buscar APK
         shell: bash
         run: |
-          echo "Buscando APK..."
           find "$PROJECT_ROOT" -type f -name "*.apk" -print
 
       - name: Guardar APK

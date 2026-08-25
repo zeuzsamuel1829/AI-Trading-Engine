@@ -39,7 +39,12 @@ jobs:
         shell: bash
         run: |
           ZIP=$(find . -maxdepth 1 -type f -name "*.zip" | head -1)
-          test -n "$ZIP"
+
+          if [ -z "$ZIP" ]; then
+            echo "ERROR: No se encontró el archivo ZIP."
+            exit 1
+          fi
+
           rm -rf proyecto
           mkdir -p proyecto
           unzip -q "$ZIP" -d proyecto
@@ -47,40 +52,77 @@ jobs:
       - name: Localizar proyecto Android
         shell: bash
         run: |
-          ROOT=$(find proyecto -type f \( -name "settings.gradle" -o -name "settings.gradle.kts" \) -print -quit | xargs -r dirname)
-          test -n "$ROOT"
+          ROOT=$(find proyecto -type f \
+            \( -name "settings.gradle" -o -name "settings.gradle.kts" \) \
+            -print -quit | xargs -r dirname)
+
+          if [ -z "$ROOT" ]; then
+            echo "ERROR: No se encontró settings.gradle."
+            exit 1
+          fi
+
           echo "PROJECT_ROOT=$ROOT" >> "$GITHUB_ENV"
           echo "Proyecto encontrado en: $ROOT"
 
       - name: Verificar Java
-        shell: bash
         run: |
           java -version
           javac -version
 
-      - name: Forzar Java 17 en Gradle
+      - name: Forzar Java y Kotlin a JVM 17
         shell: bash
         run: |
-          cat > "$PROJECT_ROOT/fix.gradle" <<'EOF'
+          cat > "$GITHUB_WORKSPACE/force-java17.gradle" <<'EOF'
           allprojects {
-              tasks.withType(JavaCompile).configureEach {
-                  sourceCompatibility = "17"
-                  targetCompatibility = "17"
+              afterEvaluate {
+                  tasks.withType(JavaCompile).configureEach {
+                      sourceCompatibility = "17"
+                      targetCompatibility = "17"
+                  }
+
+                  tasks.matching {
+                      it.name.toLowerCase().contains("kotlin")
+                  }.configureEach {
+                      try {
+                          kotlinOptions.jvmTarget = "17"
+                      } catch (Exception ignored) {
+                      }
+                  }
+
+                  if (project.hasProperty("android")) {
+                      android {
+                          compileOptions {
+                              sourceCompatibility JavaVersion.VERSION_17
+                              targetCompatibility JavaVersion.VERSION_17
+                          }
+                      }
+                  }
               }
           }
+          EOF
+
+      - name: Forzar propiedad JVM
+        shell: bash
+        run: |
+          cat > "$PROJECT_ROOT/gradle.properties" <<'EOF'
+          org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
+          kotlin.jvm.target.validation.mode=error
           EOF
 
       - name: Compilar APK
         shell: bash
         run: |
           cd "$PROJECT_ROOT"
-          gradle --no-daemon \
-            -I "$GITHUB_WORKSPACE/$PROJECT_ROOT/fix.gradle" \
+
+          gradle \
+            --no-daemon \
+            -I "$GITHUB_WORKSPACE/force-java17.gradle" \
             :app:assembleDebug
 
       - name: Buscar APK
         shell: bash
         run: |
+          echo "Buscando APK..."
           find "$PROJECT_ROOT" -type f -name "*.apk" -print
 
       - name: Guardar APK

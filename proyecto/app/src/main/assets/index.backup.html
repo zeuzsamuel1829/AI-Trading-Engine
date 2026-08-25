@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>AI Trading Engine</title>
+<style>
+:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#081019;color:#edf3f9;font-family:system-ui,-apple-system,sans-serif}
+main{min-height:100vh;padding:18px 15px 28px;background:linear-gradient(145deg,#081019,#101a28)}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:15px}.brand{font-size:21px;font-weight:800}.muted{color:#8d9caf;font-size:11px;margin-top:3px}.status{padding:8px 10px;border:1px solid #28405a;border-radius:11px;background:#101d2c;font-size:10px}.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#35d399;margin-right:6px}
+.card{background:#101a28;border:1px solid #26384e;border-radius:14px;padding:13px;margin-bottom:10px}.label{font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:#7e8da1}.green{color:#57e3a5}.red{color:#ff7180}.yellow{color:#f2c865}
+select,button{width:100%;min-height:44px;border-radius:10px;border:1px solid #2b3d55;background:#132032;color:#edf3f9;padding:10px;font-size:14px}button{margin-top:8px}.primary{background:#173d38;border-color:#2b786d;color:#a3f3e3;font-weight:700}.danger{background:#35151c;border-color:#73323e;color:#ffabb5;font-weight:700}
+.login{max-width:430px;margin:0 auto;padding-top:38px}.logo{width:105px;height:105px;border-radius:28px;border:1px solid #28405a;background:#0d1723;display:grid;place-items:center;margin:0 auto 18px;font-size:54px;color:#35d399}.login h1{text-align:center;margin:0}.login p{text-align:center;color:#91a0b2;font-size:12px;line-height:1.5}.field{margin-top:10px}.field input{width:100%;height:46px;border-radius:10px;border:1px solid #2b3d55;background:#0d1723;color:white;padding:0 12px;font-size:15px}.small{font-size:10px;color:#7f8da0;line-height:1.5}.hidden{display:none}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.stat{background:#0c1420;border-radius:9px;padding:9px}.stat b{display:block;font-size:17px;margin-top:3px}.dir{display:flex;justify-content:space-between;align-items:center}.arrow{font-size:46px;font-weight:800}.direction{font-size:25px;font-weight:800}.meter{height:7px;background:#1d2a3a;border-radius:20px;overflow:hidden;margin-top:8px}.meter i{display:block;height:100%;background:#48d99d;border-radius:20px;width:82%}.tf{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:11px}.tf div{background:#0c1420;border:1px solid #223249;border-radius:9px;padding:8px;text-align:center;font-size:10px}.tf b{display:block;margin-top:3px}.row{display:grid;grid-template-columns:1fr auto;gap:7px;margin-top:9px;font-size:12px}.bar{height:5px;background:#1d2a3a;border-radius:20px;overflow:hidden;margin-top:4px}.bar i{display:block;height:100%;background:#65d9ae;border-radius:20px}.decision{border:1px solid #5b4c25;background:#1c190e;border-radius:11px;padding:12px;margin-top:12px}.decision h2{font-size:17px;margin:4px 0}.decision p{font-size:11px;color:#a1adbc;line-height:1.45;margin:0}.trade{display:flex;justify-content:space-between;border-bottom:1px solid #202d3e;padding:9px 0;font-size:11px}.trade:last-child{border-bottom:0}.nav{position:sticky;bottom:0;display:grid;grid-template-columns:repeat(4,1fr);gap:5px;background:#0b131e;border:1px solid #25364b;border-radius:13px;padding:6px;margin-top:10px}.nav button{margin:0;border:0;background:transparent;min-height:42px;font-size:10px}.nav button.active{color:#57e3a5}.note{font-size:10px;color:#77869a;line-height:1.5;margin-top:10px}
+@media(min-width:700px){main{max-width:900px;margin:auto}.dashboard-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:10px}.card{margin-bottom:10px}}
+</style>
+</head>
+<body>
+<main>
+<section id="login" class="login">
+<div class="logo">🐂</div>
+<h1>AI TRADING ENGINE</h1>
+<p>Centro inteligente de análisis y automatización.<br>Primera versión: DEMO segura.</p>
+<div class="field"><input id="email" type="email" placeholder="Correo electrónico"></div>
+<div class="field"><input id="pass" type="password" placeholder="Contraseña"></div>
+<button class="primary" id="enter">ENTRAR EN DEMO</button>
+<p class="small">Este acceso es local para el prototipo. No guarda tus credenciales y no conecta todavía con dinero real.</p>
+</section>
+
+<section id="app" class="hidden">
+<div class="top"><div><div class="brand">AI TRADING ENGINE</div><div class="muted">V3 · DEMO</div></div><div class="status"><span class="dot" id="dot"></span><span id="status">ACTIVO</span></div></div>
+<div class="card"><div class="label">Instrumento</div><select id="asset"><option>XAUUSD</option><option>EURUSD</option><option>GBPUSD</option><option>USDJPY</option><option>BTCUSD</option></select></div>
+<div class="grid">
+<div class="stat"><span class="label">Capital demo</span><b id="capital">$5.00</b></div>
+<div class="stat"><span class="label">Resultado</span><b id="pnl" class="green">+$0.00</b></div>
+<div class="stat"><span class="label">Operaciones</span><b id="count">0</b></div>
+<div class="stat"><span class="label">Win rate</span><b id="win">—</b></div>
+</div>
+<div class="dashboard-grid">
+<div>
+<div class="card"><div class="label">Dirección del mercado</div><div class="dir" style="margin-top:8px"><div><div id="arrow" class="arrow green">↑</div></div><div><div id="direction" class="direction green">ALCISTA</div><div class="muted">Fuerza: <b id="strength">82%</b></div></div><div class="direction green" id="score">82/100</div></div><div class="meter"><i id="meter"></i></div><div class="tf"><div>4H<b class="green" id="t4">↑ Alcista</b></div><div>1H<b class="green" id="t1">↑ Alcista</b></div><div>15M<b class="yellow" id="t15">↔ Lateral</b></div><div>5M<b class="green" id="t5">↑ Alcista</b></div></div></div>
+<div class="card"><div class="label">Confluencia del análisis</div><div class="row"><span>Tendencia</span><b id="trend">84%</b></div><div class="bar"><i id="trendbar" style="width:84%"></i></div><div class="row"><span>Estructura</span><b id="structure">78%</b></div><div class="bar"><i id="structurebar" style="width:78%"></i></div><div class="row"><span>Volatilidad</span><b id="vol">71%</b></div><div class="bar"><i id="volbar" style="width:71%"></i></div><div class="row"><span>Spread / ejecución</span><b id="spread">92%</b></div><div class="bar"><i id="spreadbar" style="width:92%"></i></div><div class="row"><span>Horario</span><b id="session">69%</b></div><div class="bar"><i id="sessionbar" style="width:69%"></i></div><div class="decision"><div class="label">Decisión</div><h2 id="decision" class="yellow">🟡 ESPERAR</h2><p id="reason">El motor está analizando. Dirección no significa entrada automática.</p></div></div>
+</div>
+<div>
+<div class="card"><div class="label">Controles</div><button class="primary" id="scan">🔎 ANALIZAR AHORA</button><button id="auto">⏸ MOTOR ACTIVO</button><button class="danger" id="stop">🛑 PARADA DE EMERGENCIA</button></div>
+<div class="card"><div class="label">MT5</div><button id="mt5">🔗 CONECTAR MT5 DEMO</button><p id="mt5msg" class="small">Puente MT5 pendiente. Esta versión no solicita ni transmite credenciales.</p></div>
+<div class="card"><div class="label">Historial DEMO</div><div id="feed"><div class="trade"><span>Esperando primera oportunidad…</span><span class="yellow">—</span></div></div></div>
+</div>
+</div>
+<div class="note">⚠️ Prototipo instalable. La simulación es local. Para resultados DEMO reales necesitaremos el puente servidor/terminal MT5; la aplicación móvil no ejecutará órdenes por sí sola sin ese componente.</div>
+<div class="nav"><button class="active">⌂<br>Inicio</button><button>▥<br>Operaciones</button><button>◈<br>Análisis</button><button>⚙<br>Ajustes</button></div>
+</section>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+let running=true, emergency=false, capital=5,pnl=0,ops=0,wins=0,losses=0;
+const markets={XAUUSD:{p:2334.75,d:'ALCISTA',s:82,t:[84,78,71,92,69]},EURUSD:{p:1.1742,d:'LATERAL',s:56,t:[59,62,48,91,74]},GBPUSD:{p:1.3521,d:'BAJISTA',s:77,t:[81,79,70,88,72]},USDJPY:{p:147.32,d:'ALCISTA',s:73,t:[76,71,66,90,68]},BTCUSD:{p:112540,d:'LATERAL',s:51,t:[53,57,61,83,45]}};
+function cls(d){return d==='ALCISTA'?'green':d==='BAJISTA'?'red':'yellow'}
+function paint(){
+ const m=markets[$('asset').value],c=cls(m.d);
+ $('direction').textContent=m.d;$('direction').className='direction '+c;$('arrow').textContent=m.d==='ALCISTA'?'↑':m.d==='BAJISTA'?'↓':'↔';$('arrow').className='arrow '+c;$('strength').textContent=m.s+'%';$('score').textContent=m.s+'/100';$('score').className='direction '+c;$('meter').style.width=m.s+'%';
+ ['trend','structure','vol','spread','session'].forEach((x,i)=>{$(x).textContent=m.t[i]+'%';$(x+'bar').style.width=m.t[i]+'%'});
+ ['t4','t1','t5'].forEach(id=>{$(id).textContent=(m.d==='ALCISTA'?'↑ Alcista':m.d==='BAJISTA'?'↓ Bajista':'↔ Lateral');$(id).className=c});$('t15').textContent='↔ Lateral';
+ const avg=m.t.reduce((a,b)=>a+b,0)/5;const good=m.s>=75&&avg>=76&&running&&!emergency;
+ $('decision').textContent=good?'🟢 OPORTUNIDAD DEMO':running&&!emergency?'🟡 ESPERAR':'🔴 BLOQUEADO';$('decision').className=good?'green':running&&!emergency?'yellow':'red';
+ $('reason').textContent=good?'Confluencia suficiente en el modelo demo. Se puede simular una operación respetando el riesgo.':running&&!emergency?'La dirección por sí sola no basta. El motor espera más confirmación.':'El motor está detenido y no permite operaciones.';
+}
+function addTrade(win,p){
+ const f=$('feed');if(f.textContent.includes('Esperando'))f.innerHTML='';const r=document.createElement('div');r.className='trade';r.innerHTML='<span>'+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+' · '+$('asset').value+' · '+(win?'GANADORA':'PERDEDORA')+'</span><span class=\"'+(win?'green':'red')+'\">'+(p>=0?'+':'')+'$'+p.toFixed(2)+'</span>';f.prepend(r);
+}
+function simulate(){
+ if(!running||emergency)return;
+ const m=markets[$('asset').value],avg=m.t.reduce((a,b)=>a+b,0)/5;
+ if(m.s>=75&&avg>=76&&Math.random()>.45){
+  ops++;const win=Math.random()>.32;const p=win?Math.max(.05,capital*.018):-Math.max(.03,capital*.009);pnl+=p;capital=Math.max(.01,capital+p);win?wins++:losses++;
+  $('capital').textContent='$'+capital.toFixed(2);$('pnl').textContent=(pnl>=0?'+':'')+'$'+pnl.toFixed(2);$('pnl').className='big '+(pnl>=0?'green':'red');$('count').textContent=ops;$('win').textContent=Math.round(wins/(wins+losses)*100)+'%';addTrade(win,p);
+ }
+ paint();
+}
+$('enter').onclick=()=>{$('login').classList.add('hidden');$('app').classList.remove('hidden');paint()};
+$('asset').onchange=paint;$('scan').onclick=()=>{if(!emergency)paint()};
+$('auto').onclick=e=>{running=!running;e.currentTarget.textContent=running?'⏸ MOTOR ACTIVO':'▶ MOTOR PAUSADO';$('status').textContent=running?'ACTIVO':'PAUSADO';paint()};
+$('stop').onclick=()=>{emergency=true;running=false;$('status').textContent='PARADA DE EMERGENCIA';$('dot').style.background='#ff6475';$('auto').textContent='▶ MOTOR DETENIDO';paint()};
+$('mt5').onclick=()=>{$('mt5msg').textContent='MT5 DEMO: pendiente del puente servidor/terminal. No se enviaron credenciales.'};
+setInterval(simulate,6500);
+</script>
+</body>
+</html>

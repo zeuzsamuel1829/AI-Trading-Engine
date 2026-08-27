@@ -249,5 +249,94 @@ if($('confirm')){
 })();
 </script>
 
+
+<script>
+/* ZEUS_FINAL_CICLO_ANALISIS_V3 */
+(function () {
+  function repararCiclo() {
+    const scan = document.getElementById('scan');
+    const auto = document.getElementById('auto');
+    const stop = document.getElementById('stop');
+    const status = document.getElementById('status');
+
+    if (!scan) return;
+
+    /*
+     * Al volver a MOTOR ACTIVO:
+     * - se libera el botón ANALIZAR
+     * - se elimina el estado de bloqueo del análisis anterior
+     * - se permite iniciar un análisis nuevo
+     */
+    if (auto) {
+      auto.addEventListener('click', function () {
+        try {
+          if (typeof emergency !== 'undefined') emergency = false;
+        } catch (e) {}
+
+        scan.disabled = false;
+        scan.dataset.zeusFix = '1';
+
+        if (status) {
+          status.textContent = 'MOTOR ACTIVO — LISTO PARA ANALIZAR';
+        }
+      }, true);
+    }
+
+    /*
+     * PARADA DE EMERGENCIA:
+     * deja el análisis preparado para que, después de reactivar
+     * el motor, pueda ejecutarse nuevamente.
+     */
+    if (stop) {
+      stop.addEventListener('click', function () {
+        scan.disabled = true;
+
+        if (status) {
+          status.textContent = 'MOTOR DETENIDO — REACTIVA EL MOTOR PARA ANALIZAR';
+        }
+      }, true);
+    }
+
+    /*
+     * Si el análisis termina, el botón queda disponible para
+     * realizar otro análisis sin tener que cerrar/reabrir la aplicación.
+     */
+    scan.addEventListener('click', function () {
+      setTimeout(function () {
+        if (scan) scan.disabled = false;
+      }, 1200);
+    }, true);
+
+    /*
+     * Diagnóstico visible de las funciones principales.
+     */
+    const cards = document.querySelectorAll('.card');
+    cards.forEach(function(card) {
+      const text = (card.innerText || '').toLowerCase();
+
+      if (text.includes('historial demo')) {
+        const old = card.querySelector('.zeus-diagnostic');
+        if (!old) {
+          const d = document.createElement('div');
+          d.className = 'zeus-diagnostic';
+          d.style.marginTop = '8px';
+          d.style.padding = '8px';
+          d.style.borderRadius = '8px';
+          d.style.fontSize = '12px';
+          d.textContent = 'Diagnóstico: historial informativo/demo.';
+          card.appendChild(d);
+        }
+      }
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', repararCiclo);
+  } else {
+    repararCiclo();
+  }
+})();
+</script>
+
 </body>
 </html>

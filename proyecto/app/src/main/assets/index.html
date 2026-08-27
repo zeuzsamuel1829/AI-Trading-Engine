@@ -23,7 +23,7 @@ select,button{width:100%;min-height:44px;border-radius:10px;border:1px solid #2b
 <p>Centro inteligente de análisis y automatización.<br>Primera versión: DEMO segura.</p>
 <div class="field"><input id="email" type="email" placeholder="Correo electrónico"></div>
 <div class="field"><input id="pass" type="password" placeholder="Contraseña"></div>
-<button class="primary" id="enter">ENTRAR EN DEMO</button>
+<button class="primary" id="enter" type="button" onclick="document.getElementById('login').classList.add('hidden');document.getElementById('app').classList.remove('hidden');if(typeof paint==='function'){try{paint()}catch(e){console.error(e)}}">ENTRAR EN DEMO</button>
 <p class="small">Este acceso es local para el prototipo. No guarda tus credenciales y no conecta todavía con dinero real.</p>
 </section>
 
@@ -42,28 +42,69 @@ select,button{width:100%;min-height:44px;border-radius:10px;border:1px solid #2b
 <div class="card"><div class="label">Confluencia del análisis</div><div class="row"><span>Tendencia</span><b id="trend">84%</b></div><div class="bar"><i id="trendbar" style="width:84%"></i></div><div class="row"><span>Estructura</span><b id="structure">78%</b></div><div class="bar"><i id="structurebar" style="width:78%"></i></div><div class="row"><span>Volatilidad</span><b id="vol">71%</b></div><div class="bar"><i id="volbar" style="width:71%"></i></div><div class="row"><span>Spread / ejecución</span><b id="spread">92%</b></div><div class="bar"><i id="spreadbar" style="width:92%"></i></div><div class="row"><span>Horario</span><b id="session">69%</b></div><div class="bar"><i id="sessionbar" style="width:69%"></i></div><div class="decision"><div class="label">Decisión</div><h2 id="decision" class="yellow">🟡 ESPERAR</h2><p id="reason">El motor está analizando. Dirección no significa entrada automática.</p></div></div>
 </div>
 <div>
-<div class="card"><div class="label">Controles</div><button class="primary" id="scan">🔎 ANALIZAR AHORA</button><button id="auto">⏸ MOTOR ACTIVO</button><button class="danger" id="stop">🛑 PARADA DE EMERGENCIA</button></div>
+<div class="card"><div class="label">Controles</div><button class="primary" id="scan">🔎 ANALIZAR AHORA</button><button class="primary" id="confirm" style="display:none">✅ CONFIRMAR OPERACIÓN</button><button id="auto">⏸ MOTOR ACTIVO</button><button class="danger" id="stop">🛑 PARADA DE EMERGENCIA</button></div>
 <div class="card"><div class="label">MT5</div><button id="mt5">🔗 CONECTAR MT5 DEMO</button><p id="mt5msg" class="small">Puente MT5 pendiente. Esta versión no solicita ni transmite credenciales.</p></div>
 <div class="card"><div class="label">Historial DEMO</div><div id="feed"><div class="trade"><span>Esperando primera oportunidad…</span><span class="yellow">—</span></div></div></div>
 </div>
 </div>
 <div class="note">⚠️ Prototipo instalable. La simulación es local. Para resultados DEMO reales necesitaremos el puente servidor/terminal MT5; la aplicación móvil no ejecutará órdenes por sí sola sin ese componente.</div>
-<div class="nav"><button class="active">⌂<br>Inicio</button><button>▥<br>Operaciones</button><button>◈<br>Análisis</button><button>⚙<br>Ajustes</button></div>
+<div class="nav">
+<button class="active" id="navInicio">⌂<br>Inicio</button>
+<button id="navOperaciones">▥<br>Operaciones</button>
+<button id="navAnalisis">◈<br>Análisis</button>
+<button id="navAjustes">⚙<br>Ajustes</button>
+</div>
 </section>
 </main>
 <script>
-const $=id=>document.getElementById(id);
+const $=sel=>document.querySelector(sel.startsWith('#')||sel.startsWith('.')||sel.startsWith('[')?sel:'#'+sel);
 let running=true, emergency=false, capital=5,pnl=0,ops=0,wins=0,losses=0;
 const markets={XAUUSD:{p:2334.75,d:'ALCISTA',s:82,t:[84,78,71,92,69]},EURUSD:{p:1.1742,d:'LATERAL',s:56,t:[59,62,48,91,74]},GBPUSD:{p:1.3521,d:'BAJISTA',s:77,t:[81,79,70,88,72]},USDJPY:{p:147.32,d:'ALCISTA',s:73,t:[76,71,66,90,68]},BTCUSD:{p:112540,d:'LATERAL',s:51,t:[53,57,61,83,45]}};
 function cls(d){return d==='ALCISTA'?'green':d==='BAJISTA'?'red':'yellow'}
 function paint(){
- const m=markets[$('asset').value],c=cls(m.d);
- $('direction').textContent=m.d;$('direction').className='direction '+c;$('arrow').textContent=m.d==='ALCISTA'?'↑':m.d==='BAJISTA'?'↓':'↔';$('arrow').className='arrow '+c;$('strength').textContent=m.s+'%';$('score').textContent=m.s+'/100';$('score').className='direction '+c;$('meter').style.width=m.s+'%';
- ['trend','structure','vol','spread','session'].forEach((x,i)=>{$(x).textContent=m.t[i]+'%';$(x+'bar').style.width=m.t[i]+'%'});
- ['t4','t1','t5'].forEach(id=>{$(id).textContent=(m.d==='ALCISTA'?'↑ Alcista':m.d==='BAJISTA'?'↓ Bajista':'↔ Lateral');$(id).className=c});$('t15').textContent='↔ Lateral';
- const avg=m.t.reduce((a,b)=>a+b,0)/5;const good=m.s>=75&&avg>=76&&running&&!emergency;
- $('decision').textContent=good?'🟢 OPORTUNIDAD DEMO':running&&!emergency?'🟡 ESPERAR':'🔴 BLOQUEADO';$('decision').className=good?'green':running&&!emergency?'yellow':'red';
- $('reason').textContent=good?'Confluencia suficiente en el modelo demo. Se puede simular una operación respetando el riesgo.':running&&!emergency?'La dirección por sí sola no basta. El motor espera más confirmación.':'El motor está detenido y no permite operaciones.';
+  const m=markets[$('#asset').value];
+
+  m.p=2334.75+(Math.random()-0.5)*20;
+  m.d=Math.random()>0.5?'ALCISTA':'BAJISTA';
+  m.s=55+Math.floor(Math.random()*41);
+  m.t=Array.from({length:5},()=>55+Math.floor(Math.random()*41));
+
+  const direction=$('#direction');
+  const score=$('#score');
+  const arrow=$('#arrow');
+
+  if(direction) direction.textContent=m.d;
+  if(score) score.textContent=m.s+'/100';
+
+  if(arrow){
+    arrow.textContent=m.d==='ALCISTA'?'↑':'↓';
+    arrow.className='arrow '+(m.d==='ALCISTA'?'green':'red');
+  }
+
+  const ids=['t4','t1','t15','t5','session'];
+  ids.forEach((id,i)=>{
+    const e=$('#'+id);
+    if(e && m.t[i]!==undefined){
+      e.textContent=(m.t[i]>=70?'↑ Alcista':m.t[i]<=58?'↓ Bajista':'↔ Lateral');
+      e.className=m.t[i]>=70?'green':m.t[i]<=58?'red':'yellow';
+    }
+  });
+
+  const bars=[
+    ['trend',m.t[0]],
+    ['structure',m.t[1]],
+    ['vol',m.t[2]],
+    ['spread',m.t[3]],
+    ['session',m.t[4]]
+  ];
+
+  bars.forEach(([id,v])=>{
+    const e=$('#'+id);
+    if(e){
+      e.textContent=v+'%';
+      e.style.width=v+'%';
+    }
+  });
 }
 function addTrade(win,p){
  const f=$('feed');if(f.textContent.includes('Esperando'))f.innerHTML='';const r=document.createElement('div');r.className='trade';r.innerHTML='<span>'+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+' · '+$('asset').value+' · '+(win?'GANADORA':'PERDEDORA')+'</span><span class=\"'+(win?'green':'red')+'\">'+(p>=0?'+':'')+'$'+p.toFixed(2)+'</span>';f.prepend(r);
@@ -72,17 +113,78 @@ function simulate(){
  if(!running||emergency)return;
  const m=markets[$('asset').value],avg=m.t.reduce((a,b)=>a+b,0)/5;
  if(m.s>=75&&avg>=76&&Math.random()>.45){
-  ops++;const win=Math.random()>.32;const p=win?Math.max(.05,capital*.018):-Math.max(.03,capital*.009);pnl+=p;capital=Math.max(.01,capital+p);win?wins++:losses++;
-  $('capital').textContent='$'+capital.toFixed(2);$('pnl').textContent=(pnl>=0?'+':'')+'$'+pnl.toFixed(2);$('pnl').className='big '+(pnl>=0?'green':'red');$('count').textContent=ops;$('win').textContent=Math.round(wins/(wins+losses)*100)+'%';addTrade(win,p);
+  const win=Math.random()>.32;const p=win?Math.max(.05,capital*.018):-Math.max(.03,capital*.009);pnl+=p;capital=Math.max(.01,capital+p);win?wins++:losses++;
+  $("#count").textContent=document.querySelectorAll("#feed .trade").length;
  }
  paint();
 }
 $('enter').onclick=()=>{$('login').classList.add('hidden');$('app').classList.remove('hidden');paint()};
+
 $('asset').onchange=paint;$('scan').onclick=()=>{if(!emergency)paint()};
 $('auto').onclick=e=>{running=!running;e.currentTarget.textContent=running?'⏸ MOTOR ACTIVO':'▶ MOTOR PAUSADO';$('status').textContent=running?'ACTIVO':'PAUSADO';paint()};
 $('stop').onclick=()=>{emergency=true;running=false;$('status').textContent='PARADA DE EMERGENCIA';$('dot').style.background='#ff6475';$('auto').textContent='▶ MOTOR DETENIDO';paint()};
 $('mt5').onclick=()=>{$('mt5msg').textContent='MT5 DEMO: pendiente del puente servidor/terminal. No se enviaron credenciales.'};
-setInterval(simulate,6500);
+
+// ===== NAVEGACION Y FLUJO DE ANALISIS =====
+function activateNav(id){
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
+  const b=$(id);
+  if(b)b.classList.add('active');
+}
+
+if($('navInicio')) $('navInicio').onclick=()=>{
+  activateNav('navInicio');
+  window.scrollTo({top:0,behavior:'smooth'});
+  paint();
+};
+
+if($('navOperaciones')) $('navOperaciones').onclick=()=>{
+  activateNav('navOperaciones');
+  const f=$('feed');
+  if(f)f.scrollIntoView({behavior:'smooth',block:'center'});
+};
+
+if($('navAnalisis')) $('navAnalisis').onclick=()=>{
+  activateNav('navAnalisis');
+  if($('scan'))$('scan').click();
+};
+
+if($('navAjustes')) $('navAjustes').onclick=()=>{
+  activateNav('navAjustes');
+  const m=$('mt5');
+  if(m)m.scrollIntoView({behavior:'smooth',block:'center'});
+};
+
+// Analizar -> mostrar oportunidad y habilitar confirmación
+if($('scan')){
+  $('.scan').onclick=(e)=>{ console.log("SCAN FUNCIONANDO");
+    if(e)e.preventDefault();
+    if(emergency){ paint(); return; }
+
+    const c=$('confirm');
+    if(c)c.style.display='block';
+
+    if($('decision'))$('decision').textContent='🟢 OPORTUNIDAD DEMO';
+    if($('reason'))$('reason').textContent='Análisis ejecutado. Revisa la dirección y confirma la operación.';
+
+    try{ paint(); }catch(err){ console.log('paint:',err); }
+  };
+}
+
+// Confirmar -> registrar operación
+if($('confirm')){
+  $('confirm').onclick=()=>{
+    if(emergency)return;
+    const asset=$('asset')?.value||'XAUUSD';
+    const direction=$('direction')?.textContent||'BAJISTA';
+    ops++;addTrade(true,0);paint();
+    $('confirm').style.display='none';
+    if($('decision'))$('decision').textContent='✅ OPERACIÓN CONFIRMADA';
+    if($('reason'))$('reason').textContent='Operación confirmada y registrada en el historial.';
+    paint();
+  };
+}
+
 </script>
 </body>
 </html>

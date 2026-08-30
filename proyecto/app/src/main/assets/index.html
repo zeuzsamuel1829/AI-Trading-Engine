@@ -2,341 +2,556 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>AI Trading Engine</title>
 <style>
-:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#081019;color:#edf3f9;font-family:system-ui,-apple-system,sans-serif}
-main{min-height:100vh;padding:18px 15px 28px;background:linear-gradient(145deg,#081019,#101a28)}
-.top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:15px}.brand{font-size:21px;font-weight:800}.muted{color:#8d9caf;font-size:11px;margin-top:3px}.status{padding:8px 10px;border:1px solid #28405a;border-radius:11px;background:#101d2c;font-size:10px}.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#35d399;margin-right:6px}
-.card{background:#101a28;border:1px solid #26384e;border-radius:14px;padding:13px;margin-bottom:10px}.label{font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:#7e8da1}.green{color:#57e3a5}.red{color:#ff7180}.yellow{color:#f2c865}
-select,button{width:100%;min-height:44px;border-radius:10px;border:1px solid #2b3d55;background:#132032;color:#edf3f9;padding:10px;font-size:14px}button{margin-top:8px}.primary{background:#173d38;border-color:#2b786d;color:#a3f3e3;font-weight:700}.danger{background:#35151c;border-color:#73323e;color:#ffabb5;font-weight:700}
-.login{max-width:430px;margin:0 auto;padding-top:38px}.logo{width:105px;height:105px;border-radius:28px;border:1px solid #28405a;background:#0d1723;display:grid;place-items:center;margin:0 auto 18px;font-size:54px;color:#35d399}.login h1{text-align:center;margin:0}.login p{text-align:center;color:#91a0b2;font-size:12px;line-height:1.5}.field{margin-top:10px}.field input{width:100%;height:46px;border-radius:10px;border:1px solid #2b3d55;background:#0d1723;color:white;padding:0 12px;font-size:15px}.small{font-size:10px;color:#7f8da0;line-height:1.5}.hidden{display:none}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.stat{background:#0c1420;border-radius:9px;padding:9px}.stat b{display:block;font-size:17px;margin-top:3px}.dir{display:flex;justify-content:space-between;align-items:center}.arrow{font-size:46px;font-weight:800}.direction{font-size:25px;font-weight:800}.meter{height:7px;background:#1d2a3a;border-radius:20px;overflow:hidden;margin-top:8px}.meter i{display:block;height:100%;background:#48d99d;border-radius:20px;width:82%}.tf{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:11px}.tf div{background:#0c1420;border:1px solid #223249;border-radius:9px;padding:8px;text-align:center;font-size:10px}.tf b{display:block;margin-top:3px}.row{display:grid;grid-template-columns:1fr auto;gap:7px;margin-top:9px;font-size:12px}.bar{height:5px;background:#1d2a3a;border-radius:20px;overflow:hidden;margin-top:4px}.bar i{display:block;height:100%;background:#65d9ae;border-radius:20px}.decision{border:1px solid #5b4c25;background:#1c190e;border-radius:11px;padding:12px;margin-top:12px}.decision h2{font-size:17px;margin:4px 0}.decision p{font-size:11px;color:#a1adbc;line-height:1.45;margin:0}.trade{display:flex;justify-content:space-between;border-bottom:1px solid #202d3e;padding:9px 0;font-size:11px}.trade:last-child{border-bottom:0}.nav{position:sticky;bottom:0;display:grid;grid-template-columns:repeat(4,1fr);gap:5px;background:#0b131e;border:1px solid #25364b;border-radius:13px;padding:6px;margin-top:10px}.nav button{margin:0;border:0;background:transparent;min-height:42px;font-size:10px}.nav button.active{color:#57e3a5}.note{font-size:10px;color:#77869a;line-height:1.5;margin-top:10px}
-@media(min-width:700px){main{max-width:900px;margin:auto}.dashboard-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:10px}.card{margin-bottom:10px}}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;min-height:100%;font-family:Arial,sans-serif;background:#07020f;color:#f5f2ff}
+body{overflow:hidden;touch-action:pan-y;-webkit-overflow-scrolling:touch}
+button,input{font:inherit}
+button{cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.screen{display:none;width:100%;height:100dvh;min-height:100vh}
+.screen.active{display:block}
+#login{background:radial-gradient(circle at 50% 20%,#5415a0 0,#19052d 38%,#05020a 100%);padding:24px 18px;padding-top:max(24px,env(safe-area-inset-top));padding-bottom:max(24px,env(safe-area-inset-bottom))}
+.loginBox{height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;overflow-y:auto}
+.logo{width:130px;height:130px;border:2px solid #a13cff;border-radius:28px;display:flex;flex-direction:column;justify-content:center;align-items:center;box-shadow:0 0 30px #8d20ff;margin-bottom:25px;flex:none}
+.logo b{font-size:48px}.logo span{letter-spacing:5px;font-weight:bold}
+.loginBox h1{font-size:27px;letter-spacing:3px;margin:10px 0}
+.sub{color:#aaa0ba;letter-spacing:2px}
+.badge{display:inline-block;border:1px solid #b24cff;border-radius:30px;padding:9px 22px;color:#d084ff;margin:22px 0}
+.primary,.secondary{width:100%;max-width:390px;border-radius:16px;padding:17px;border:0;font-weight:bold;font-size:17px}
+.primary{background:linear-gradient(90deg,#7d20ff,#c54cff);color:white;box-shadow:0 0 20px #7620ff55}
+.secondary{background:#10091d;color:white;border:1px solid #8734d8;margin-top:12px}
+.inputs{width:100%;max-width:390px;margin-top:18px}
+.input{background:#08040f;border:1px solid #342246;border-radius:14px;padding:16px;margin:9px 0;color:white;width:100%}
+.hidden{display:none!important}
+
+#app{background:#070b12;height:100dvh;min-height:100vh;overflow:hidden;padding-top:env(safe-area-inset-top)}
+.header{height:115px;background:linear-gradient(135deg,#0a0b12,#21063d);padding:14px 18px;border-bottom:1px solid #27143d}
+.top{display:flex;align-items:center;gap:18px}
+.menu{font-size:27px;line-height:1}
+.title{font-size:18px;font-weight:bold;letter-spacing:1px}
+.header small{display:block;color:#aaa5b5;text-align:center;margin-top:2px}
+.mode{text-align:center;color:#c15cff;font-weight:bold;margin-top:12px}
+.content{height:calc(100dvh - 180px);overflow-y:auto;overflow-x:hidden;padding:14px 14px calc(95px + env(safe-area-inset-bottom));scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-y:auto;touch-action:pan-y}
+.content::-webkit-scrollbar{display:none}
+.panel{display:none}.panel.active{display:block}
+.card{background:linear-gradient(145deg,#131820,#0d1118);border:1px solid #252c38;border-radius:15px;padding:15px;margin-bottom:14px;box-shadow:0 5px 20px #0005}
+.card h3{font-size:15px;margin:0 0 13px}
+.status{font-size:18px;font-weight:bold}
+.label{color:#aaaeb9;font-size:14px;margin-top:8px}
+.row{display:flex;gap:10px}.row>*{flex:1}
+.btn{padding:14px 9px;border-radius:12px;border:1px solid #515967;background:#121722;color:white;font-weight:bold;min-height:50px}
+.btn.primary{background:linear-gradient(90deg,#7421d7,#b64cff);border:0}
+.btn.danger{border-color:#e54848;color:#ff6666;background:transparent}
+.stats .line{display:flex;justify-content:space-between;gap:14px;padding:10px 4px;border-bottom:1px solid #252b35;font-size:14px}
+.stats .line:last-child{border-bottom:0}
+.green{color:#4ee85c}.purple{color:#bf55ff}.red{color:#ff5757}.yellow{color:#f2d35c}
+.empty{text-align:center;border:1px solid #252c38;border-radius:12px;padding:35px 18px;color:#aaa}
+.empty .icon{font-size:42px;color:#bf55ff;margin-bottom:15px}
+.analysisState{text-align:center;font-size:20px;color:#c15cff;font-weight:bold;padding:20px 0}
+.list-item{display:flex;justify-content:space-between;align-items:center;gap:10px;background:#171d26;border:1px solid #28303b;border-radius:10px;padding:14px;margin:7px 0;color:#eee}
+.tag{color:#c45cff;border:1px solid #7432a5;border-radius:7px;padding:5px 9px;font-size:12px}
+.trade{display:flex;justify-content:space-between;align-items:center;gap:12px;background:#171d26;border:1px solid #28303b;border-radius:10px;padding:12px;margin:7px 0}
+.trade small{color:#9fa6b3}
+.nav{position:fixed;left:0;right:0;bottom:0;height:65px;height:calc(65px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);background:#0b1017;border-top:1px solid #303641;display:flex;z-index:20}
+.nav button{flex:1;background:none;border:0;color:#a7abb5;font-size:12px}
+.nav button.active{color:#c052ff}
+.nav span{display:block;font-size:21px;margin-bottom:3px}
+.toast{position:fixed;left:50%;bottom:calc(78px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#17101f;border:1px solid #8d36c9;border-radius:12px;padding:10px 16px;color:white;display:none;z-index:99;max-width:90vw;text-align:center}
+.toast.show{display:block}
+.sideMenu{position:fixed;inset:0;z-index:50;display:none}
+.sideMenu.open{display:block}
+.sideMenu .backdrop{position:absolute;inset:0;background:#0008}
+.drawer{position:absolute;top:0;bottom:0;left:0;width:min(310px,84vw);background:#0d1119;border-right:1px solid #5b2781;padding:24px 16px;padding-top:max(24px,env(safe-area-inset-top));box-shadow:12px 0 35px #0008}
+.drawer h2{margin:8px 0 24px;font-size:20px}
+.drawer button{width:100%;text-align:left;background:#151b24;border:1px solid #282f3a;color:white;border-radius:10px;padding:13px;margin:5px 0}
+.drawer .close{background:transparent;color:#c45cff;border-color:#7432a5}
 </style>
 </head>
 <body>
-<main>
-<section id="login" class="login">
-<div class="logo">🐂</div>
-<h1>AI TRADING ENGINE</h1>
-<p>Centro inteligente de análisis y automatización.<br>Primera versión: DEMO segura.</p>
-<div class="field"><input id="email" type="email" placeholder="Correo electrónico"></div>
-<div class="field"><input id="pass" type="password" placeholder="Contraseña"></div>
-<button class="primary" id="enter" type="button" onclick="document.getElementById('login').classList.add('hidden');document.getElementById('app').classList.remove('hidden');if(typeof paint==='function'){try{paint()}catch(e){console.error(e)}}">ENTRAR EN DEMO</button>
-<p class="small">Este acceso es local para el prototipo. No guarda tus credenciales y no conecta todavía con dinero real.</p>
+
+<section id="login" class="screen active">
+  <div class="loginBox">
+    <div class="logo"><b>AI</b><span>TRADING</span></div>
+    <div class="badge">✦ PREMIUM DEMO</div>
+    <h1>AI TRADING ENGINE</h1>
+    <div class="sub">SISTEMA INSTITUCIONAL</div>
+    <p class="sub">ANÁLISIS INTELIGENTE · EJECUCIÓN PRECISA</p>
+    <button id="demoLogin" class="primary" type="button">✦ ENTRAR EN DEMO</button>
+    <button id="realLogin" class="secondary" type="button">ACCESO REAL</button>
+    <div id="realBox" class="inputs hidden">
+      <input id="user" class="input" placeholder="Usuario" autocomplete="username">
+      <input id="pass" class="input" type="password" placeholder="Contraseña" autocomplete="current-password">
+      <button id="realSubmit" class="primary" type="button">INICIAR SESIÓN</button>
+    </div>
+  </div>
 </section>
 
-<section id="app" class="hidden">
-<div class="top"><div><div class="brand">AI TRADING ENGINE</div><div class="muted">V3 · DEMO</div></div><div class="status"><span class="dot" id="dot"></span><span id="status">ACTIVO</span></div></div>
-<div class="card"><div class="label">Instrumento</div><select id="asset"><option>XAUUSD</option><option>EURUSD</option><option>GBPUSD</option><option>USDJPY</option><option>BTCUSD</option></select></div>
-<div class="grid">
-<div class="stat"><span class="label">Capital demo</span><b id="capital">$5.00</b></div>
-<div class="stat"><span class="label">Resultado</span><b id="pnl" class="green">+$0.00</b></div>
-<div class="stat"><span class="label">Operaciones</span><b id="count">0</b></div>
-<div class="stat"><span class="label">Win rate</span><b id="win">—</b></div>
-</div>
-<div class="dashboard-grid">
-<div>
-<div class="card"><div class="label">Dirección del mercado</div><div class="dir" style="margin-top:8px"><div><div id="arrow" class="arrow green">↑</div></div><div><div id="direction" class="direction green">ALCISTA</div><div class="muted">Fuerza: <b id="strength">82%</b></div></div><div class="direction green" id="score">82/100</div></div><div class="meter"><i id="meter"></i></div><div class="tf"><div>4H<b class="green" id="t4">↑ Alcista</b></div><div>1H<b class="green" id="t1">↑ Alcista</b></div><div>15M<b class="yellow" id="t15">↔ Lateral</b></div><div>5M<b class="green" id="t5">↑ Alcista</b></div></div></div>
-<div class="card"><div class="label">Confluencia del análisis</div><div class="row"><span>Tendencia</span><b id="trend">84%</b></div><div class="bar"><i id="trendbar" style="width:84%"></i></div><div class="row"><span>Estructura</span><b id="structure">78%</b></div><div class="bar"><i id="structurebar" style="width:78%"></i></div><div class="row"><span>Volatilidad</span><b id="vol">71%</b></div><div class="bar"><i id="volbar" style="width:71%"></i></div><div class="row"><span>Spread / ejecución</span><b id="spread">92%</b></div><div class="bar"><i id="spreadbar" style="width:92%"></i></div><div class="row"><span>Horario</span><b id="session">69%</b></div><div class="bar"><i id="sessionbar" style="width:69%"></i></div><div class="decision"><div class="label">Decisión</div><h2 id="decision" class="yellow">🟡 ESPERAR</h2><p id="reason">El motor está analizando. Dirección no significa entrada automática.</p></div></div>
-</div>
-<div>
-<div class="card"><div class="label">Controles</div><button class="primary" id="scan">🔎 ANALIZAR AHORA</button><button class="primary" id="confirm" style="display:none">✅ CONFIRMAR OPERACIÓN</button><button id="auto">⏸ MOTOR ACTIVO</button><button class="danger" id="stop">🛑 PARADA DE EMERGENCIA</button></div>
-<div class="card"><div class="label">MT5</div><button id="mt5">🔗 CONECTAR MT5 DEMO</button><p id="mt5msg" class="small">Puente MT5 pendiente. Esta versión no solicita ni transmite credenciales.</p></div>
-<div class="card"><div class="label">Historial DEMO</div><div id="feed"><div class="trade"><span>Esperando primera oportunidad…</span><span class="yellow">—</span></div></div></div>
-</div>
-</div>
-<div class="note">⚠️ Prototipo instalable. La simulación es local. Para resultados DEMO reales necesitaremos el puente servidor/terminal MT5; la aplicación móvil no ejecutará órdenes por sí sola sin ese componente.</div>
-<div class="nav">
-<button class="active" id="navInicio">⌂<br>Inicio</button>
-<button id="navOperaciones">▥<br>Operaciones</button>
-<button id="navAnalisis">◈<br>Análisis</button>
-<button id="navAjustes">⚙<br>Ajustes</button>
-</div>
+<section id="app" class="screen">
+  <header class="header">
+    <div class="top">
+      <button id="menuBtn" class="menu" aria-label="Abrir menú" style="background:none;border:0;color:white">☰</button>
+      <div class="title">AI TRADING ENGINE</div>
+    </div>
+    <small>DEMO · SISTEMA INSTITUCIONAL</small>
+    <div id="mode" class="mode">● DEMO ACTIVO</div>
+  </header>
+
+  <main id="content" class="content">
+
+    <div id="home" class="panel active">
+      <div class="card">
+        <h3>ESTADO DEL MOTOR</h3>
+        <div id="homeStatus"><b class="status green">● MOTOR ACTIVO</b><div class="label">Sistema DEMO listo para analizar.</div></div>
+        <div class="row" style="margin-top:16px">
+          <button id="scan" class="btn primary" type="button">⌕ ANALIZAR<br>MERCADO</button>
+          <button id="pause" class="btn" type="button">Ⅱ PAUSAR<br>MOTOR</button>
+        </div>
+      </div>
+
+      <div class="card stats">
+        <h3>RESUMEN RÁPIDO</h3>
+        <div class="line"><span>Operaciones hoy</span><span id="ops">0</span></div>
+        <div class="line"><span>Balance</span><span id="balance">$10,000.00</span></div>
+        <div class="line"><span>PnL</span><span id="homePnl" class="green">$0.00</span></div>
+        <div class="line"><span>Win Rate</span><span id="homeWinRate">0%</span></div>
+        <div class="line"><span>Estado</span><span id="homeState">EN ESPERA</span></div>
+      </div>
+
+      <div class="card">
+        <h3>CONEXIÓN MT5 DEMO</h3>
+        <div id="mt5Status"><b class="purple">● NO CONECTADO</b><div class="label">Bridge DEMO pendiente.</div></div>
+        <button id="mt5" class="btn" style="width:100%;margin-top:14px;color:#c15cff;border-color:#8734d8" type="button">CONECTAR MT5 DEMO</button>
+      </div>
+    </div>
+
+    <div id="operations" class="panel">
+      <div class="card">
+        <h3>OPERACIONES ABIERTAS</h3>
+        <div id="openOperations" class="empty"><div class="icon">▣</div><b>No hay operaciones abiertas</b><p>Las operaciones aparecerán aquí si una operación DEMO queda abierta.</p></div>
+      </div>
+      <div class="card">
+        <h3>HISTORIAL DEMO</h3>
+        <div id="historyList" class="empty"><div class="icon">◷</div><b>No hay operaciones todavía</b><p>Ejecuta un análisis DEMO para generar el primer registro.</p></div>
+      </div>
+      <div class="card stats">
+        <h3>ESTADÍSTICAS</h3>
+        <div class="line"><span>Total operaciones</span><span id="statTotal">0</span></div>
+        <div class="line"><span>Operaciones ganadoras</span><span id="statWins">0</span></div>
+        <div class="line"><span>Operaciones perdedoras</span><span id="statLosses">0</span></div>
+        <div class="line"><span>Win Rate</span><span id="statWinRate">0%</span></div>
+        <div class="line"><span>PnL Total</span><span id="statPnl" class="green">$0.00</span></div>
+      </div>
+    </div>
+
+    <div id="analysis" class="panel">
+      <div class="card">
+        <h3>ANÁLISIS DE MERCADO</h3>
+        <div class="empty" style="padding:25px 15px">
+          <div>Estado del análisis</div>
+          <div id="analysisState" class="analysisState">ANÁLISIS EN ESPERA</div>
+          <div id="analysisMessage">Presiona el botón para iniciar un nuevo análisis DEMO.</div>
+          <button id="scan2" class="btn primary" style="width:100%;margin-top:18px" type="button">▶ INICIAR ANÁLISIS</button>
+        </div>
+      </div>
+      <div class="card stats">
+        <h3>ÚLTIMO RESULTADO</h3>
+        <div class="line"><span>Dirección</span><span id="direction">-</span></div>
+        <div class="line"><span>Fuerza</span><span id="strength">-</span></div>
+        <div class="line"><span>Confianza</span><span id="confidence">-</span></div>
+        <div class="line"><span>Hora del análisis</span><span id="analysisTime">-</span></div>
+        <div class="line"><span>Resultado DEMO</span><span id="analysisResult">-</span></div>
+      </div>
+    </div>
+
+    <div id="settings" class="panel">
+      <div class="card">
+        <h3>CONFIGURACIÓN</h3>
+        <div class="list-item"><span>Configuración del motor</span><span>›</span></div>
+        <div class="list-item"><span>Gestión de riesgo</span><span>›</span></div>
+        <div class="list-item"><span>Notificaciones</span><span>›</span></div>
+        <div class="list-item"><span>Conexión MT5</span><span>›</span></div>
+        <div class="list-item"><span>Tema</span><span class="tag">MORADO</span></div>
+        <div class="list-item"><span>Idioma</span><span class="tag">ESPAÑOL</span></div>
+      </div>
+      <div class="card">
+        <h3>SESIÓN</h3>
+        <button id="logout" class="btn danger" style="width:100%" type="button">⇥ CERRAR SESIÓN DEMO</button>
+      </div>
+      <div class="card">
+        <h3>SEGURIDAD</h3>
+        <button id="emergency" class="btn danger" style="width:100%" type="button">⛔ PARADA DE EMERGENCIA</button>
+      </div>
+    </div>
+
+  </main>
+
+  <nav class="nav" aria-label="Navegación">
+    <button class="active" data-panel="home" type="button"><span>⌂</span>Inicio</button>
+    <button data-panel="operations" type="button"><span>☷</span>Operaciones</button>
+    <button data-panel="analysis" type="button"><span>⌁</span>Análisis</button>
+    <button data-panel="settings" type="button"><span>⚙</span>Ajustes</button>
+  </nav>
 </section>
-</main>
+
+<div id="sideMenu" class="sideMenu">
+  <div id="drawerBackdrop" class="backdrop"></div>
+  <aside class="drawer">
+    <h2>AI TRADING ENGINE</h2>
+    <button type="button" data-drawer-panel="home">⌂ Inicio</button>
+    <button type="button" data-drawer-panel="operations">☷ Operaciones</button>
+    <button type="button" data-drawer-panel="analysis">⌁ Análisis</button>
+    <button type="button" data-drawer-panel="settings">⚙ Configuración</button>
+    <button id="drawerClose" class="close" type="button">✕ CERRAR MENÚ</button>
+  </aside>
+</div>
+
+<div id="toast" class="toast"></div>
+
 <script>
-const $=sel=>document.querySelector(sel.startsWith('#')||sel.startsWith('.')||sel.startsWith('[')?sel:'#'+sel);
-let running=true, emergency=false, capital=5,pnl=0,ops=0,wins=0,losses=0;
-const markets={XAUUSD:{p:2334.75,d:'ALCISTA',s:82,t:[84,78,71,92,69]},EURUSD:{p:1.1742,d:'LATERAL',s:56,t:[59,62,48,91,74]},GBPUSD:{p:1.3521,d:'BAJISTA',s:77,t:[81,79,70,88,72]},USDJPY:{p:147.32,d:'ALCISTA',s:73,t:[76,71,66,90,68]},BTCUSD:{p:112540,d:'LATERAL',s:51,t:[53,57,61,83,45]}};
-function cls(d){return d==='ALCISTA'?'green':d==='BAJISTA'?'red':'yellow'}
-function paint(){
-  const m=markets[$('#asset').value];
+(function(){
+'use strict';
 
-  m.p=2334.75+(Math.random()-0.5)*20;
-  m.d=Math.random()>0.5?'ALCISTA':'BAJISTA';
-  m.s=55+Math.floor(Math.random()*41);
-  m.t=Array.from({length:5},()=>55+Math.floor(Math.random()*41));
+const $ = id => document.getElementById(id);
 
-  const direction=$('#direction');
-  const score=$('#score');
-  const arrow=$('#arrow');
+const state = {
+  motor: true,
+  emergency: false,
+  analyzing: false,
+  totalOps: 0,
+  winners: 0,
+  losers: 0,
+  pnlTotal: 0,
+  history: []
+};
 
-  if(direction) direction.textContent=m.d;
-  if(score) score.textContent=m.s+'/100';
+function toast(text){
+  const e = $('toast');
+  if(!e) return;
+  e.textContent = text;
+  e.classList.add('show');
+  clearTimeout(toast.timer);
+  toast.timer = setTimeout(()=>e.classList.remove('show'),1800);
+}
 
-  if(arrow){
-    arrow.textContent=m.d==='ALCISTA'?'↑':'↓';
-    arrow.className='arrow '+(m.d==='ALCISTA'?'green':'red');
-  }
+function money(n){
+  return '$' + Number(n).toFixed(2);
+}
 
-  const ids=['t4','t1','t15','t5','session'];
-  ids.forEach((id,i)=>{
-    const e=$('#'+id);
-    if(e && m.t[i]!==undefined){
-      e.textContent=(m.t[i]>=70?'↑ Alcista':m.t[i]<=58?'↓ Bajista':'↔ Lateral');
-      e.className=m.t[i]>=70?'green':m.t[i]<=58?'red':'yellow';
-    }
+function nowText(){
+  return new Date().toLocaleString('es-PE',{
+    day:'2-digit',month:'2-digit',year:'numeric',
+    hour:'2-digit',minute:'2-digit',second:'2-digit'
+  });
+}
+
+function setPanel(id){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  const panel = $(id);
+  if(panel) panel.classList.add('active');
+
+  document.querySelectorAll('.nav button').forEach(b=>{
+    b.classList.toggle('active', b.dataset.panel === id);
   });
 
-  const bars=[
-    ['trend',m.t[0]],
-    ['structure',m.t[1]],
-    ['vol',m.t[2]],
-    ['spread',m.t[3]],
-    ['session',m.t[4]]
-  ];
+  const content = $('content');
+  if(content) content.scrollTop = 0;
+}
 
-  bars.forEach(([id,v])=>{
-    const e=$('#'+id);
-    if(e){
-      e.textContent=v+'%';
-      e.style.width=v+'%';
-    }
+function updateMotor(){
+  const ok = state.motor && !state.emergency;
+
+  if($('homeStatus')){
+    $('homeStatus').innerHTML = ok
+      ? '<b class="status green">● MOTOR ACTIVO</b><div class="label">Sistema DEMO listo para analizar.</div>'
+      : '<b class="status red">● MOTOR DETENIDO</b><div class="label">El acceso a análisis está bloqueado.</div>';
+  }
+
+  if($('pause')){
+    $('pause').innerHTML = ok ? 'Ⅱ PAUSAR<br>MOTOR' : '▶ REACTIVAR<br>MOTOR';
+  }
+
+  if($('emergency')){
+    $('emergency').textContent = state.emergency
+      ? '▶ REACTIVAR SISTEMA'
+      : '⛔ PARADA DE EMERGENCIA';
+  }
+
+  if($('homeState') && !state.analyzing){
+    $('homeState').textContent = ok ? 'EN ESPERA' : 'DETENIDO';
+  }
+}
+
+function updateStats(){
+  const winRate = state.totalOps
+    ? Math.round((state.winners / state.totalOps) * 100)
+    : 0;
+
+  if($('ops')) $('ops').textContent = state.totalOps;
+  if($('balance')) $('balance').textContent = money(10000 + state.pnlTotal);
+
+  if($('homePnl')){
+    $('homePnl').textContent = money(state.pnlTotal);
+    $('homePnl').className = state.pnlTotal >= 0 ? 'green' : 'red';
+  }
+
+  if($('homeWinRate')) $('homeWinRate').textContent = winRate + '%';
+  if($('statTotal')) $('statTotal').textContent = state.totalOps;
+  if($('statWins')) $('statWins').textContent = state.winners;
+  if($('statLosses')) $('statLosses').textContent = state.losers;
+  if($('statWinRate')) $('statWinRate').textContent = winRate + '%';
+
+  if($('statPnl')){
+    $('statPnl').textContent = money(state.pnlTotal);
+    $('statPnl').className = state.pnlTotal >= 0 ? 'green' : 'red';
+  }
+}
+
+function renderHistory(){
+  const box = $('historyList');
+  if(!box) return;
+
+  if(!state.history.length){
+    box.className = 'empty';
+    box.innerHTML = '<div class="icon">◷</div><b>No hay operaciones todavía</b><p>Ejecuta un análisis DEMO para generar el primer registro.</p>';
+    return;
+  }
+
+  box.className = '';
+  box.innerHTML = '';
+
+  state.history.slice(0,10).forEach(op=>{
+    const row = document.createElement('div');
+    row.className = 'trade';
+
+    const left = document.createElement('div');
+    left.innerHTML =
+      '<b>' + op.direction + '</b><br>' +
+      '<small>' + op.time + ' · DEMO · ' + op.instrument + '</small>';
+
+    const right = document.createElement('div');
+    right.className = op.result >= 0 ? 'green' : 'red';
+    right.textContent = (op.result >= 0 ? '+' : '') + money(op.result);
+
+    row.appendChild(left);
+    row.appendChild(right);
+    box.appendChild(row);
   });
 }
-function addTrade(win,p){
- const f=$('feed');if(f.textContent.includes('Esperando'))f.innerHTML='';const r=document.createElement('div');r.className='trade';r.innerHTML='<span>'+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+' · '+$('asset').value+' · '+(win?'GANADORA':'PERDEDORA')+'</span><span class=\"'+(win?'green':'red')+'\">'+(p>=0?'+':'')+'$'+p.toFixed(2)+'</span>';f.prepend(r);
-}
-function simulate(){
- if(!running||emergency)return;
- const m=markets[$('asset').value],avg=m.t.reduce((a,b)=>a+b,0)/5;
- if(m.s>=75&&avg>=76&&Math.random()>.45){
-  const win=Math.random()>.32;const p=win?Math.max(.05,capital*.018):-Math.max(.03,capital*.009);pnl+=p;capital=Math.max(.01,capital+p);win?wins++:losses++;
-  $("#count").textContent=document.querySelectorAll("#feed .trade").length;
- }
- paint();
-}
-$('enter').onclick=()=>{$('login').classList.add('hidden');$('app').classList.remove('hidden');paint()};
 
-$('asset').onchange=paint;$('scan').onclick=()=>{if(!emergency)paint()};
-$('auto').onclick=e=>{running=!running;e.currentTarget.textContent=running?'⏸ MOTOR ACTIVO':'▶ MOTOR PAUSADO';$('status').textContent=running?'ACTIVO':'PAUSADO';paint()};
-$('stop').onclick=()=>{emergency=true;running=false;$('status').textContent='PARADA DE EMERGENCIA';$('dot').style.background='#ff6475';$('auto').textContent='▶ MOTOR DETENIDO';paint()};
-$('mt5').onclick=()=>{$('mt5msg').textContent='MT5 DEMO: pendiente del puente servidor/terminal. No se enviaron credenciales.'};
+function renderOpenOperations(){
+  const box = $('openOperations');
+  if(!box) return;
 
-// ===== NAVEGACION Y FLUJO DE ANALISIS =====
-function activateNav(id){
-  document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
-  const b=$(id);
-  if(b)b.classList.add('active');
+  // La versión actual de DEMO liquida la operación inmediatamente.
+  // Por eso no se presenta una operación cerrada como si siguiera abierta.
+  box.className = 'empty';
+  box.innerHTML = '<div class="icon">▣</div><b>No hay operaciones abiertas</b><p>Las operaciones DEMO de esta versión se registran como cerradas al completar el análisis.</p>';
 }
 
-if($('navInicio')) $('navInicio').onclick=()=>{
-  activateNav('navInicio');
-  window.scrollTo({top:0,behavior:'smooth'});
-  paint();
-};
+function updateAnalysisResult(direction,strength,confidence,result){
+  if($('direction')) $('direction').textContent = direction;
+  if($('strength')) $('strength').textContent = strength + '%';
+  if($('confidence')) $('confidence').textContent = confidence + '%';
+  if($('analysisTime')) $('analysisTime').textContent = nowText();
 
-if($('navOperaciones')) $('navOperaciones').onclick=()=>{
-  activateNav('navOperaciones');
-  const f=$('feed');
-  if(f)f.scrollIntoView({behavior:'smooth',block:'center'});
-};
-
-if($('navAnalisis')) $('navAnalisis').onclick=()=>{
-  activateNav('navAnalisis');
-  if($('scan'))$('scan').click();
-};
-
-if($('navAjustes')) $('navAjustes').onclick=()=>{
-  activateNav('navAjustes');
-  const m=$('mt5');
-  if(m)m.scrollIntoView({behavior:'smooth',block:'center'});
-};
-
-// Analizar -> mostrar oportunidad y habilitar confirmación
-if($('scan')){
-  $('.scan').onclick=(e)=>{ console.log("SCAN FUNCIONANDO");
-    if(e)e.preventDefault();
-    if(emergency){ paint(); return; }
-
-    const c=$('confirm');
-    if(c)c.style.display='block';
-
-    if($('decision'))$('decision').textContent='🟢 OPORTUNIDAD DEMO';
-    if($('reason'))$('reason').textContent='Análisis ejecutado. Revisa la dirección y confirma la operación.';
-
-    try{ paint(); }catch(err){ console.log('paint:',err); }
-  };
+  if($('analysisResult')){
+    $('analysisResult').textContent = (result >= 0 ? '+' : '') + money(result);
+    $('analysisResult').className = result >= 0 ? 'green' : 'red';
+  }
 }
 
-// Confirmar -> registrar operación
-if($('confirm')){
-  $('confirm').onclick=()=>{
-    if(emergency)return;
-    const asset=$('asset')?.value||'XAUUSD';
-    const direction=$('direction')?.textContent||'BAJISTA';
-    ops++;addTrade(true,0);paint();
-    $('confirm').style.display='none';
-    if($('decision'))$('decision').textContent='✅ OPERACIÓN CONFIRMADA';
-    if($('reason'))$('reason').textContent='Operación confirmada y registrada en el historial.';
-    paint();
-  };
-}
-
-</script>
-
-<script>
-/* ZEUS_ANALIZAR_FIX_V2 */
-(function() {
-  function activarAnalizar() {
-    const scan = document.getElementById('scan');
-    if (!scan || scan.dataset.zeusFix === '1') return;
-
-    scan.dataset.zeusFix = '1';
-
-    scan.addEventListener('click', function() {
-      if (typeof emergency !== 'undefined' && emergency) {
-        if (typeof emergencyPaint === 'function') emergencyPaint();
-        return;
-      }
-
-      scan.disabled = true;
-      scan.textContent = 'ANALIZANDO...';
-
-      const status = document.getElementById('status');
-      if (status) status.textContent = 'ANÁLISIS EN PROCESO...';
-
-      let result = document.getElementById('analysisResult');
-
-      if (!result) {
-        result = document.createElement('div');
-        result.id = 'analysisResult';
-        result.className = 'card';
-        result.style.marginTop = '12px';
-        result.style.padding = '14px';
-        scan.parentElement.insertAdjacentElement('afterend', result);
-      }
-
-      result.classList.remove('hidden');
-      result.innerHTML = '<b>ANÁLISIS EN PROCESO...</b>';
-
-      setTimeout(function() {
-        scan.disabled = false;
-        scan.textContent = '✓ ANÁLISIS COMPLETADO';
-
-        if (status) {
-          status.textContent = 'ANÁLISIS COMPLETADO — RESULTADO LISTO';
-        }
-
-        result.innerHTML =
-          '<b>RESULTADO DEL ANÁLISIS</b><br>' +
-          '✓ Escaneo completado<br>' +
-          '✓ Datos procesados<br>' +
-          '✓ Confluencia evaluada<br>' +
-          '✓ Dirección del mercado evaluada<br>' +
-          '✓ Resultado preparado para el siguiente paso';
-      }, 700);
-    });
+function runAnalysis(){
+  if(state.emergency || !state.motor){
+    toast('El motor está detenido');
+    return;
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', activarAnalizar);
-  } else {
-    activarAnalizar();
+  if(state.analyzing){
+    toast('Análisis ya en proceso...');
+    return;
   }
-})();
-</script>
 
+  state.analyzing = true;
 
-<script>
-/* ZEUS_FINAL_CICLO_ANALISIS_V3 */
-(function () {
-  function repararCiclo() {
-    const scan = document.getElementById('scan');
-    const auto = document.getElementById('auto');
-    const stop = document.getElementById('stop');
-    const status = document.getElementById('status');
+  if($('analysisState')) $('analysisState').textContent = 'ANALIZANDO...';
+  if($('analysisMessage')) $('analysisMessage').textContent = 'Procesando datos DEMO...';
+  if($('homeState')) $('homeState').textContent = 'ANALIZANDO';
 
-    if (!scan) return;
+  setPanel('analysis');
+  toast('Analizando mercado DEMO...');
 
-    /*
-     * Al volver a MOTOR ACTIVO:
-     * - se libera el botón ANALIZAR
-     * - se elimina el estado de bloqueo del análisis anterior
-     * - se permite iniciar un análisis nuevo
-     */
-    if (auto) {
-      auto.addEventListener('click', function () {
-        try {
-          if (typeof emergency !== 'undefined') emergency = false;
-        } catch (e) {}
-
-        scan.disabled = false;
-        scan.dataset.zeusFix = '1';
-
-        if (status) {
-          status.textContent = 'MOTOR ACTIVO — LISTO PARA ANALIZAR';
-        }
-      }, true);
+  setTimeout(()=>{
+    if(state.emergency || !state.motor){
+      state.analyzing = false;
+      updateMotor();
+      return;
     }
 
-    /*
-     * PARADA DE EMERGENCIA:
-     * deja el análisis preparado para que, después de reactivar
-     * el motor, pueda ejecutarse nuevamente.
-     */
-    if (stop) {
-      stop.addEventListener('click', function () {
-        scan.disabled = true;
+    // DEMO solamente: estos valores NO representan datos reales de mercado.
+    const direction = Math.random() >= 0.5 ? 'COMPRA' : 'VENTA';
+    const strength = 70 + Math.floor(Math.random()*25);
+    const confidence = 68 + Math.floor(Math.random()*29);
 
-        if (status) {
-          status.textContent = 'MOTOR DETENIDO — REACTIVA EL MOTOR PARA ANALIZAR';
-        }
-      }, true);
-    }
+    // Resultado simulado, deliberadamente separado de MT5 real.
+    const result = direction === 'COMPRA'
+      ? Number((40 + Math.random()*120).toFixed(2))
+      : -Number((20 + Math.random()*90).toFixed(2));
 
-    /*
-     * Si el análisis termina, el botón queda disponible para
-     * realizar otro análisis sin tener que cerrar/reabrir la aplicación.
-     */
-    scan.addEventListener('click', function () {
-      setTimeout(function () {
-        if (scan) scan.disabled = false;
-      }, 1200);
-    }, true);
+    const op = {
+      direction,
+      strength,
+      confidence,
+      result,
+      instrument:'DEMO',
+      time: nowText()
+    };
 
-    /*
-     * Diagnóstico visible de las funciones principales.
-     */
-    const cards = document.querySelectorAll('.card');
-    cards.forEach(function(card) {
-      const text = (card.innerText || '').toLowerCase();
+    state.totalOps++;
+    if(result >= 0) state.winners++;
+    else state.losers++;
+    state.pnlTotal += result;
+    state.history.unshift(op);
 
-      if (text.includes('historial demo')) {
-        const old = card.querySelector('.zeus-diagnostic');
-        if (!old) {
-          const d = document.createElement('div');
-          d.className = 'zeus-diagnostic';
-          d.style.marginTop = '8px';
-          d.style.padding = '8px';
-          d.style.borderRadius = '8px';
-          d.style.fontSize = '12px';
-          d.textContent = 'Diagnóstico: historial informativo/demo.';
-          card.appendChild(d);
-        }
-      }
-    });
+    updateAnalysisResult(direction,strength,confidence,result);
+    updateStats();
+    renderHistory();
+    renderOpenOperations();
+
+    if($('analysisState')) $('analysisState').textContent = 'ANÁLISIS COMPLETADO';
+    if($('analysisMessage')) $('analysisMessage').textContent = 'Señal y operación DEMO registradas. No es una ejecución MT5 real.';
+    if($('homeState')) $('homeState').textContent = 'EN ESPERA';
+
+    state.analyzing = false;
+    toast('Análisis DEMO completado');
+  },900);
+}
+
+function resetSession(){
+  state.motor = true;
+  state.emergency = false;
+  state.analyzing = false;
+  state.totalOps = 0;
+  state.winners = 0;
+  state.losers = 0;
+  state.pnlTotal = 0;
+  state.history = [];
+
+  if($('analysisState')) $('analysisState').textContent = 'ANÁLISIS EN ESPERA';
+  if($('analysisMessage')) $('analysisMessage').textContent = 'Presiona el botón para iniciar un nuevo análisis DEMO.';
+  if($('direction')) $('direction').textContent = '-';
+  if($('strength')) $('strength').textContent = '-';
+  if($('confidence')) $('confidence').textContent = '-';
+  if($('analysisTime')) $('analysisTime').textContent = '-';
+  if($('analysisResult')) $('analysisResult').textContent = '-';
+
+  updateMotor();
+  updateStats();
+  renderHistory();
+  renderOpenOperations();
+  setPanel('home');
+}
+
+$('demoLogin')?.addEventListener('click',()=>{
+  $('login').classList.remove('active');
+  $('app').classList.add('active');
+  resetSession();
+  toast('Modo DEMO activado');
+});
+
+$('realLogin')?.addEventListener('click',()=>{
+  $('realBox')?.classList.toggle('hidden');
+});
+
+$('realSubmit')?.addEventListener('click',()=>{
+  toast('Acceso REAL bloqueado en esta versión DEMO');
+});
+
+$('scan')?.addEventListener('click',runAnalysis);
+$('scan2')?.addEventListener('click',runAnalysis);
+
+$('pause')?.addEventListener('click',()=>{
+  if(state.emergency){
+    toast('Primero reactiva el sistema de emergencia');
+    return;
   }
+  state.motor = !state.motor;
+  updateMotor();
+  toast(state.motor ? 'Motor reactivado' : 'Motor pausado');
+});
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', repararCiclo);
-  } else {
-    repararCiclo();
+$('emergency')?.addEventListener('click',()=>{
+  if(!state.emergency){
+    state.emergency = true;
+    state.motor = false;
+    state.analyzing = false;
+    updateMotor();
+    toast('PARADA DE EMERGENCIA activada');
+  }else{
+    state.emergency = false;
+    state.motor = true;
+    updateMotor();
+    toast('Sistema reactivado');
   }
+});
+
+$('mt5')?.addEventListener('click',()=>{
+  const bridge =
+    window.AndroidBridge ||
+    window.MT5Bridge ||
+    window.bridge ||
+    null;
+
+  if(bridge){
+    $('mt5Status').innerHTML =
+      '<b class="yellow">● BRIDGE DETECTADO</b><div class="label">Existe una interfaz Android disponible; falta validar el protocolo MT5.</div>';
+    toast('Bridge detectado; falta validar MT5');
+  }else{
+    $('mt5Status').innerHTML =
+      '<b class="purple">● NO CONECTADO</b><div class="label">No se detectó un bridge MT5 expuesto a esta página. No se fingirá una conexión.</div>';
+    toast('MT5 DEMO: bridge pendiente');
+  }
+});
+
+$('logout')?.addEventListener('click',()=>{
+  $('app').classList.remove('active');
+  $('login').classList.add('active');
+  resetSession();
+  toast('Sesión DEMO cerrada');
+});
+
+document.querySelectorAll('.nav button').forEach(b=>{
+  b.addEventListener('click',()=>setPanel(b.dataset.panel));
+});
+
+// Menú lateral funcional.
+function closeDrawer(){
+  $('sideMenu')?.classList.remove('open');
+}
+$('menuBtn')?.addEventListener('click',()=>$('sideMenu')?.classList.add('open'));
+$('drawerBackdrop')?.addEventListener('click',closeDrawer);
+$('drawerClose')?.addEventListener('click',closeDrawer);
+document.querySelectorAll('[data-drawer-panel]').forEach(b=>{
+  b.addEventListener('click',()=>{
+    setPanel(b.dataset.drawerPanel);
+    closeDrawer();
+  });
+});
+
+// No bloquear touchmove/wheel globalmente.
+// Esto es deliberado: permite scroll vertical normal dentro de .content.
+window.addEventListener('resize',()=>{
+  // Recalcula el layout usando dvh/CSS env sin forzar scroll.
+  updateMotor();
+});
+
+updateMotor();
+updateStats();
+renderHistory();
+renderOpenOperations();
+
 })();
 </script>
-
 </body>
 </html>

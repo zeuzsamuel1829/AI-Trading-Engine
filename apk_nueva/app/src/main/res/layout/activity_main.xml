@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/fondo"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="12dp"
+        android:text="AI TRADING ENGINE"
+        android:textColor="@color/blanco"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/txtEstado"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="DESCONECTADO"
+        android:textColor="@color/gris"
+        android:textSize="14sp" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <ScrollView
+            android:id="@+id/panelInicio"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <TextView android:id="@+id/txtBalance" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Balance\n--" android:textColor="@color/blanco" />
+                    <TextView android:id="@+id/txtEquity" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Equity\n--" android:textColor="@color/blanco" />
+                    <TextView android:id="@+id/txtMargen" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Margen\n--" android:textColor="@color/blanco" />
+                </LinearLayout>
+                <TextView android:id="@+id/txtMotor" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="18dp" android:text="MOTOR IA: PAUSADO" android:textColor="@color/gris" android:textStyle="bold" />
+                <TextView android:id="@+id/txtDetalleInicio" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="Esperando" android:textColor="@color/gris" />
+                <Button android:id="@+id/btnMotor" android:layout_width="match_parent" android:layout_height="52dp" android:layout_marginTop="16dp" android:backgroundTint="@color/morado" android:text="ACTIVAR / PAUSAR MOTOR IA" android:textColor="@color/blanco" />
+                <Button android:id="@+id/btnVerificar" android:layout_width="match_parent" android:layout_height="52dp" android:layout_marginTop="8dp" android:backgroundTint="#E67E22" android:text="RECONECTAR / VERIFICAR" android:textColor="@color/blanco" />
+                <Button android:id="@+id/btnEmergencia" android:layout_width="match_parent" android:layout_height="52dp" android:layout_marginTop="8dp" android:backgroundTint="#C0392B" android:text="PARADA DE EMERGENCIA" android:textColor="@color/blanco" />
+            </LinearLayout>
+        </ScrollView>
+
+        <ScrollView
+            android:id="@+id/panelOps"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="OPERACIONES" android:textColor="@color/blanco" android:textStyle="bold" android:textSize="16sp" />
+                <TextView android:id="@+id/txtDetalle" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="Sin datos" android:textColor="@color/gris" />
+            </LinearLayout>
+        </ScrollView>
+
+        <ScrollView
+            android:id="@+id/panelMotor"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="MOTOR IA" android:textColor="@color/blanco" android:textStyle="bold" android:textSize="16sp" />
+                <TextView android:id="@+id/txtMotorInfo" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="Sin datos" android:textColor="@color/gris" />
+            </LinearLayout>
+        </ScrollView>
+        <ScrollView
+            android:id="@+id/panelAjustes"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="AJUSTES" android:textColor="@color/blanco" android:textStyle="bold" android:textSize="16sp" />
+                <TextView android:id="@+id/txtAjustes" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="Sin datos" android:textColor="@color/gris" />
+            </LinearLayout>
+        </ScrollView>
+        <ScrollView
+            android:id="@+id/panelCal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="CALENDARIO ECONOMICO" android:textColor="@color/blanco" android:textStyle="bold" android:textSize="16sp" />
+                <TextView android:id="@+id/txtCal" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="Sin eventos. El Bridge no envia calendario." android:textColor="@color/gris" />
+            </LinearLayout>
+        </ScrollView>
+    </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <Button android:id="@+id/tabInicio" android:layout_width="0dp" android:layout_height="48dp" android:layout_weight="1" android:backgroundTint="@color/morado" android:text="INICIO" android:textColor="@color/blanco" />
+        <Button android:id="@+id/tabOps" android:layout_width="0dp" android:layout_height="48dp" android:layout_weight="1" android:backgroundTint="#333333" android:text="OPS" android:textColor="@color/blanco" />
+        <Button android:id="@+id/tabMotor" android:layout_width="0dp" android:layout_height="48dp" android:layout_weight="1" android:backgroundTint="#333333" android:text="IA" android:textColor="@color/blanco" />
+        <Button android:id="@+id/tabAjustes" android:layout_width="0dp" android:layout_height="48dp" android:layout_weight="1" android:backgroundTint="#333333" android:text="CFG" android:textColor="@color/blanco" />
+        <Button android:id="@+id/tabCal" android:layout_width="0dp" android:layout_height="48dp" android:layout_weight="1" android:backgroundTint="#333333" android:text="CAL" android:textColor="@color/blanco" />
+    </LinearLayout>
+</LinearLayout>

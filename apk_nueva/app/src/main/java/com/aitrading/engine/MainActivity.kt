@@ -29,10 +29,26 @@ class MainActivity : AppCompatActivity() {
         findViewById<Button>(R.id.tabMotor).setOnClickListener { mostrar("motor") }
         findViewById<Button>(R.id.tabAjustes).setOnClickListener { mostrar("ajustes") }
         findViewById<Button>(R.id.tabCal).setOnClickListener { mostrar("cal") }
-        verificar()
+        findViewById<Button>(R.id.btnLogin).setOnClickListener {
+            findViewById<android.view.View>(R.id.panelLogin).visibility = android.view.View.GONE
+            findViewById<android.view.View>(R.id.panelApp).visibility = android.view.View.VISIBLE
+            findViewById<android.view.View>(R.id.barraTabs).visibility = android.view.View.VISIBLE
+            mostrar("inicio")
+            verificar()
+        }
     }
 
+    private fun pintarTabs(tab: String) {
+        val morado = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#7B2CBF"))
+        val gris = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#333333"))
+        findViewById<Button>(R.id.tabInicio).backgroundTintList = if (tab == "inicio") morado else gris
+        findViewById<Button>(R.id.tabOps).backgroundTintList = if (tab == "ops") morado else gris
+        findViewById<Button>(R.id.tabMotor).backgroundTintList = if (tab == "motor") morado else gris
+        findViewById<Button>(R.id.tabAjustes).backgroundTintList = if (tab == "ajustes") morado else gris
+        findViewById<Button>(R.id.tabCal).backgroundTintList = if (tab == "cal") morado else gris
+    }
     private fun mostrar(tab: String) {
+        pintarTabs(tab)
         val inicio = findViewById<android.view.View>(R.id.panelInicio)
         val ops = findViewById<android.view.View>(R.id.panelOps)
         val motor = findViewById<android.view.View>(R.id.panelMotor)

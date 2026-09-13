@@ -90,7 +90,7 @@
                 </LinearLayout>
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:background="@drawable/bg_card" android:orientation="vertical" android:padding="10dp">
                     <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="MERCADOS FAVORITOS" android:textColor="@color/blanco" android:textStyle="bold" />
-                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="XAUUSD    0.00    0.00%" android:textColor="@color/gris" android:paddingTop="6dp" />
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:id="@+id/txtFavoritos" android:text="Esperando precio del Bridge" android:textColor="@color/gris" android:paddingTop="6dp" />
                     <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="BTCUSD    0.00    0.00%" android:textColor="@color/gris" android:paddingTop="4dp" />
                     <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="EURUSD    0.00    0.00%" android:textColor="@color/gris" android:paddingTop="4dp" />
                 </LinearLayout>
@@ -125,22 +125,24 @@
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:orientation="horizontal">
                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:background="@drawable/bg_card" android:orientation="vertical" android:padding="8dp" android:layout_marginEnd="4dp">
                         <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="GANANCIA" android:textColor="@color/gris" android:textSize="11sp" />
-                        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="0.00 USD" android:textColor="@color/verde" android:textStyle="bold" />
+                        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:id="@+id/txtGanancia" android:text="0.00 USD" android:textColor="@color/verde" android:textStyle="bold" />
                     </LinearLayout>
                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:background="@drawable/bg_card" android:orientation="vertical" android:padding="8dp" android:layout_margin="4dp">
                         <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="POSICIONES" android:textColor="@color/gris" android:textSize="11sp" />
-                        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="0" android:textColor="@color/blanco" android:textStyle="bold" />
+                        <TextView android:id="@+id/txtPosiciones" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="0" android:textColor="@color/blanco" android:textStyle="bold" />
                     </LinearLayout>
                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:background="@drawable/bg_card" android:orientation="vertical" android:padding="8dp" android:layout_marginStart="4dp">
                         <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="RIESGO" android:textColor="@color/gris" android:textSize="11sp" />
-                        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="0.00%" android:textColor="@color/blanco" android:textStyle="bold" />
+                        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:id="@+id/txtRiesgo" android:text="0.00%" android:textColor="@color/blanco" android:textStyle="bold" />
                     </LinearLayout>
                 </LinearLayout>
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:background="@drawable/bg_card" android:orientation="vertical" android:padding="10dp">
-                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="DATOS REALES DEL BRIDGE" android:textColor="@color/blanco" android:textStyle="bold" />
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="POSICION ABIERTA" android:textColor="@color/blanco" android:textStyle="bold" />
                     <TextView android:id="@+id/txtDetalle" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingTop="6dp" android:text="Sin posiciones" android:textColor="@color/gris" />
                 </LinearLayout>
-                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="NUEVA ORDEN / CERRAR TODO / GESTIONAR se activan en Capa 2" android:textColor="@color/gris" android:textSize="12sp" />
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="DEMO: cada boton abre 0.01 en MT5 Demo. No pulses si ya hay posicion." android:textColor="@color/gris" android:textSize="12sp" />
+            <Button android:id="@+id/btnCompra" android:layout_width="match_parent" android:layout_height="48dp" android:layout_marginTop="10dp" android:backgroundTint="@color/verde" android:text="NUEVA ORDEN COMPRA DEMO" android:textColor="@color/fondo" />
+                <Button android:id="@+id/btnVenta" android:layout_width="match_parent" android:layout_height="48dp" android:layout_marginTop="8dp" android:backgroundTint="#D32F2F" android:text="NUEVA ORDEN VENTA DEMO" android:textColor="@color/blanco" />
             </LinearLayout>
         </ScrollView>
         <ScrollView
@@ -153,7 +155,7 @@
                 <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingTop="4dp" android:text="XAUUSD / GOLD    M1 M5 M15 H1 H4 D1" android:textColor="@color/gris" android:textSize="12sp" />
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:background="@drawable/bg_card" android:orientation="vertical" android:padding="10dp">
                     <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="GRAFICO" android:textColor="@color/blanco" android:textStyle="bold" />
-                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingTop="6dp" android:text="El grafico de velas se activa en Capa 2. Aqui se muestra el estado real." android:textColor="@color/gris" android:textSize="12sp" />
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingTop="6dp" android:text="Estado real del Bridge. Sin velas inventadas." android:textColor="@color/gris" android:textSize="12sp" />
                     <TextView android:id="@+id/txtMotorInfo" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingTop="8dp" android:text="Sin datos" android:textColor="@color/gris" />
                 </LinearLayout>
                 <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="TENDENCIA 0   ESTRUCTURA 0   MOMENTUM 0" android:textColor="@color/gris" android:textSize="12sp" />
@@ -161,9 +163,10 @@
                 <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingTop="4dp" android:text="CONFLUENCIA 0   REGIMEN 0   ACCION PRECIO 0" android:textColor="@color/gris" android:textSize="12sp" />
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:background="@drawable/bg_card" android:orientation="vertical" android:padding="10dp">
                     <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="MEDIAS MOVILES EMA" android:textColor="@color/blanco" android:textStyle="bold" />
-                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingTop="6dp" android:text="EMA9 0.00   EMA21 0.00   EMA50 0.00   EMA200 0.00" android:textColor="@color/gris" android:textSize="12sp" />
-                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingTop="8dp" android:text="ESCENARIO ACTUAL: sin datos suficientes" android:textColor="@color/gris" />
-                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="PROBABILIDAD 0%" android:textColor="@color/verde" />
+                    <TextView android:id="@+id/txtPatrones" android:layout_width="match_parent" android:layout_height="wrap_content" android:textSize="12sp" android:textColor="@color/gris" android:text="Patrones: --" />
+                    <TextView android:id="@+id/txtEma" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="EMA9 --   EMA21 --   EMA50 --" android:textColor="@color/gris" android:textSize="12sp" />
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingTop="8dp" android:id="@+id/txtEscenario" android:text="ESCENARIO: --" android:textColor="@color/gris" />
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:id="@+id/txtProb" android:text="TENDENCIA --" android:textColor="@color/verde" />
                 </LinearLayout>
             </LinearLayout>
         </ScrollView>
@@ -208,7 +211,7 @@
                     <TextView android:id="@+id/txtCal" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Sin eventos. El Bridge no envia calendario." android:textColor="@color/gris" />
                 </LinearLayout>
                 <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="FIJAR ALERTAS   FILTRAR   IMPACTO   ANALISIS IA" android:textColor="@color/gris" android:textSize="12sp" />
-                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingTop="6dp" android:text="Horario GMT-05:00. Fuente oficial en Capa 3." android:textColor="@color/gris" android:textSize="11sp" />
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingTop="6dp" android:text="Horario GMT-05:00. Sin fuente hasta que el Bridge envie eventos." android:textColor="@color/gris" android:textSize="11sp" />
             </LinearLayout>
         </ScrollView>
     </FrameLayout>

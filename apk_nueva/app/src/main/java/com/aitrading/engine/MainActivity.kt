@@ -2,6 +2,8 @@ package com.aitrading.engine
 
 import android.os.Bundle
 import android.widget.Button
+import android.widget.EditText
+import android.widget.Toast
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import org.json.JSONObject
@@ -29,7 +31,30 @@ class MainActivity : AppCompatActivity() {
         findViewById<Button>(R.id.tabMotor).setOnClickListener { mostrar("motor") }
         findViewById<Button>(R.id.tabAjustes).setOnClickListener { mostrar("ajustes") }
         findViewById<Button>(R.id.tabCal).setOnClickListener { mostrar("cal") }
+        findViewById<Button>(R.id.btnCompra).setOnClickListener { enviarOrden("BUY") }
+        findViewById<Button>(R.id.btnVenta).setOnClickListener { enviarOrden("SELL") }
         findViewById<Button>(R.id.btnLogin).setOnClickListener {
+            val cuenta = findViewById<EditText>(R.id.edtCuenta).text.toString().trim()
+            val pass = findViewById<EditText>(R.id.edtPass).text.toString().trim()
+            val server = findViewById<EditText>(R.id.edtServer).text.toString().trim()
+            if (cuenta.isEmpty() || pass.isEmpty() || server.isEmpty()) {
+                Toast.makeText(this, "Debes llenar cuenta, contrasena y servidor", Toast.LENGTH_LONG).show()
+                return@setOnClickListener
+            }
+            val prefs = getSharedPreferences("login", MODE_PRIVATE)
+            val savedC = prefs.getString("cuenta", "") ?: ""
+            val savedP = prefs.getString("pass", "") ?: ""
+            val savedS = prefs.getString("server", "") ?: ""
+            if (savedC.isEmpty()) {
+                prefs.edit()
+                    .putString("cuenta", cuenta)
+                    .putString("pass", pass)
+                    .putString("server", server)
+                    .apply()
+            } else if (cuenta != savedC || pass != savedP || server != savedS) {
+                Toast.makeText(this, "Cuenta, contrasena o servidor incorrectos", Toast.LENGTH_LONG).show()
+                return@setOnClickListener
+            }
             findViewById<android.view.View>(R.id.panelLogin).visibility = android.view.View.GONE
             findViewById<android.view.View>(R.id.panelApp).visibility = android.view.View.VISIBLE
             findViewById<android.view.View>(R.id.barraTabs).visibility = android.view.View.VISIBLE
@@ -122,11 +147,25 @@ class MainActivity : AppCompatActivity() {
                     } else {
                         txtEstado.text = "SIN VERIFICAR"
                     }
-                    txtBalance.text = "Balance\n${status.opt("balance")}"
-                    txtEquity.text = "Equity\n${status.opt("equity")}"
-                    txtMargen.text = "Margen\n${status.opt("free_margin")}"
+                    txtBalance.text = "Balance\n${num(status, "balance", "BALANCE", "Balance")}"
+                    txtEquity.text = "Equity\n${num(status, "equity", "EQUITY", "Equity")}"
+                    txtMargen.text = "Margen\n${num(status, "free_margin", "FREE_MARGIN", "freeMargin", "margen", "MARGIN")}"
+                    val fav = findViewById<TextView>(R.id.txtFavoritos)
+                    val sym = status.optString("symbol", "BTCUSD")
+                    fav.text = "$sym  BID ${num(status, "bid", "BID")}  ASK ${num(status, "ask", "ASK")}"
                     txtDetalleInicio.text = "Bridge: $bridge | MT5: $mt5"
                     pintarOperaciones(status)
+                    try {
+                        val pr = status.opt("profit")
+                        val npos = when {
+                            status.optJSONArray("positions") != null -> status.optJSONArray("positions").length()
+                            status.optJSONArray("open_positions") != null -> status.optJSONArray("open_positions").length()
+                            else -> if (pr != null && pr.toString() != "null" && pr.toString() != "0") 1 else 0
+                        }
+                        findViewById<TextView>(R.id.txtDetalleInicio).text =
+                            "POSICIONES ABIERTAS: $npos | Ganancia flotante: $pr"
+                    } catch (_: Exception) {}
+                    analizarVelas(status)
                     val aj = findViewById<TextView>(R.id.txtAjustes)
                     aj.text = "Bridge:\n" + bridgeUrl +
                         "\n\nModo: " + status.optString("mode", "DEMO") +
@@ -168,13 +207,115 @@ class MainActivity : AppCompatActivity() {
                 break
             }
         }
-        if (lista.isEmpty()) {
-            txt.text = "Bridge: ${status.optString("mt5")} | Profit: $profit\nPendiente: $pending\nNo hay posiciones abiertas."
-        } else {
-            txt.text = "Profit: $profit\nPendiente: $pending\n$lista"
-        }
+        val result = status.opt("last_order_result")
+        val margen = status.opt("margin")
+        val equity = status.opt("equity")
+        findViewById<TextView>(R.id.txtGanancia).text = "$profit USD"
+        var npos = 0
+        try {
+            if (margen != null && margen.toString() != "null" && margen.toString().toDouble() > 0) npos = 1
+        } catch (_: Exception) {}
+        if (result != null && result.toString().contains("ticket")) npos = maxOf(npos, 1)
+        findViewById<TextView>(R.id.txtPosiciones).text = npos.toString()
+        var riesgo = "0.00%"
+        try {
+            val m = margen.toString().toDouble()
+            val e = equity.toString().toDouble()
+            if (e > 0) riesgo = String.format("%.4f%%", (m / e) * 100.0)
+        } catch (_: Exception) {}
+        findViewById<TextView>(R.id.txtRiesgo).text = riesgo
+        val ticket = if (result is org.json.JSONObject) result.opt("ticket") else null
+        txt.text = "BTCUSD BUY 0.01\nTicket: $ticket\nP/L: $profit\nMargen: $margen"
     }
 
+
+    private fun num(obj: JSONObject, vararg keys: String): String {
+        for (k in keys) {
+            if (obj.has(k) && !obj.isNull(k)) {
+                val v = obj.opt(k)
+                if (v != null && v.toString() != "null" && v.toString().isNotBlank()) {
+                    return v.toString()
+                }
+            }
+        }
+        return "0.00"
+    }
+
+    private fun enviarOrden(lado: String) {
+        val det = findViewById<TextView>(R.id.txtDetalle)
+        det.text = "Enviando $lado DEMO..."
+        thread {
+            try {
+                val id = "apk-" + System.currentTimeMillis()
+                val body = """{"id":"$id","direction":"$lado","symbol":"BTCUSD","volume":0.01}"""
+                val url = java.net.URL("$bridgeUrl/mt5/order/pending")
+                val conn = url.openConnection() as java.net.HttpURLConnection
+                conn.connectTimeout = 8000
+                conn.readTimeout = 8000
+                conn.requestMethod = "POST"
+                conn.doOutput = true
+                conn.setRequestProperty("Content-Type", "application/json")
+                conn.setRequestProperty("Accept", "application/json")
+                conn.setRequestProperty("X-Bridge-Token", "DEMO-ZEUS-2026")
+                conn.outputStream.write(body.toByteArray())
+                val code = conn.responseCode
+                val txt = (if (code < 400) conn.inputStream else conn.errorStream).bufferedReader().readText()
+                runOnUiThread { det.text = "$lado HTTP=$code\n$txt"; verificar() }
+            } catch (e: Exception) {
+                runOnUiThread { det.text = "Error orden: ${e.message}" }
+            }
+        }
+    }
+    private fun ema(closes: List<Double>, n: Int): Double {
+        if (closes.size < n) return 0.0
+        val k = 2.0 / (n + 1)
+        var e = closes.take(n).average()
+        for (j in n until closes.size) e = closes[j] * k + e * (1 - k)
+        return e
+    }
+    private fun setTxt(id: Int, value: String) {
+        try { findViewById<TextView>(id).text = value } catch (_: Exception) {}
+    }
+    private fun analizarVelas(status: JSONObject): String {
+        val arr = status.optJSONArray("candles") ?: return "Sin velas"
+        if (arr.length() < 21) return "Velas insuficientes: ${arr.length()}"
+        val closes = mutableListOf<Double>()
+        for (n in 0 until arr.length()) {
+            val o = arr.optJSONObject(n) ?: continue
+            closes.add(o.optDouble("close", 0.0))
+        }
+        val e9 = ema(closes, 9)
+        val e21 = ema(closes, 21)
+        val e50 = ema(closes, 50)
+        val last = closes.last()
+        val tendencia = when {
+            last > e21 && e9 > e21 -> "ALCISTA"
+            last < e21 && e9 < e21 -> "BAJISTA"
+            else -> "LATERAL"
+        }
+        setTxt(R.id.txtEma, "EMA9 ${"%.2f".format(e9)}  EMA21 ${"%.2f".format(e21)}  EMA50 ${"%.2f".format(e50)}")
+        setTxt(R.id.txtEscenario, "ESCENARIO: $tendencia  velas ${closes.size}  close $last")
+        setTxt(R.id.txtProb, "TENDENCIA $tendencia · 9 patrones sin confluencia multi-TF")
+        val pat = patronesSimples(closes)
+        setTxt(R.id.txtPatrones, pat + "  Sin 2a TF = no opera.")
+        setTxt(R.id.txtMotorInfo, "Velas ${closes.size}  Precio $last  $tendencia. No opera solo.")
+        return tendencia
+    }
+    private fun patronesSimples(closes: List<Double>): String {
+        if (closes.size < 40) return "Patrones: velas cortas"
+        val w = closes.takeLast(80)
+        val max1 = w.maxOrNull() ?: return "Patrones: --"
+        val min1 = w.minOrNull() ?: return "Patrones: --"
+        val iMax = w.indexOf(max1)
+        val iMin = w.indexOf(min1)
+        val nearTop = w.filter { kotlin.math.abs(it - max1) / max1 < 0.0025 }.size
+        val nearBot = w.filter { kotlin.math.abs(it - min1) / min1 < 0.0025 }.size
+        return when {
+            nearTop >= 2 && iMax < w.size - 5 -> "Posible doble techo"
+            nearBot >= 2 && iMin < w.size - 5 -> "Posible doble suelo"
+            else -> "Sin figura clara (bandera/cuna/triangulo no confirmados)"
+        }
+    }
     private fun getJson(url: String): JSONObject {
         val conn = URL(url).openConnection() as HttpURLConnection
         conn.connectTimeout = 8000

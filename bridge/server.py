@@ -14,13 +14,24 @@ state = {
     "last_heartbeat": None,
     "symbol": None,
     "bid": None,
-    "ask": None
+    "ask": None,
+    "balance": None,
+    "equity": None,
+    "margin": None,
+    "free_margin": None,
+    "profit": None,
+    "symbols": [],
+    "candles": [],
+    "candles_by_tf": {},
+    "timeframe": None,
+    "pending_order": None,
+    "last_order_result": None
 }
 
 class Handler(BaseHTTPRequestHandler):
 
     def send_json(self, code, data):
-        body = json.dumps(data).encode()
+        body = json.dumps(data, separators=(',', ':')).encode()
         self.send_response(code)
         self.send_header("Content-Type", "application/json")
         self.send_header("Content-Length", str(len(body)))
@@ -43,8 +54,10 @@ class Handler(BaseHTTPRequestHandler):
         if self.path == "/mt5/status":
             return self.send_json(200, state)
 
-        return self.send_json(404, {"ok": False, "error": "not_found"})
+        if self.path == "/mt5/order/pending":
+            return self.send_json(200, {"ok": True, "order": state.get("pending_order")})
 
+        return self.send_json(404, {"ok": False, "error": "not_found"})
     def do_POST(self):
         if not self.authorized():
             return self.send_json(401, {
@@ -56,19 +69,59 @@ class Handler(BaseHTTPRequestHandler):
         raw = self.rfile.read(length) if length else b"{}"
 
         try:
-            data = json.loads(raw.decode())
-        except Exception:
+            text = raw.decode("utf-8", errors="strict").rstrip("\x00").strip()
+            data = json.loads(text)
+        except Exception as e:
+            print("JSON ERROR:", repr(e))
+            print("RAW:", repr(raw[:500]))
             return self.send_json(400, {
                 "ok": False,
                 "error": "invalid_json"
             })
 
+        if self.path == "/mt5/market/symbols":
+            state["symbols"] = data.get("symbols", [])
+            return self.send_json(200, {
+                "ok": True,
+                "bridge": "online",
+                "mt5": "connected",
+                "symbols": state["symbols"]
+            })
+
+        if self.path == "/mt5/market/candles":
+            state["symbol"] = data.get("symbol")
+            tf = str(data.get("timeframe") or "UNKNOWN")
+            state["timeframe"] = tf
+            candles = data.get("candles", [])
+            state["candles"] = candles
+            state["candles_by_tf"][tf] = candles
+            return self.send_json(200, {
+                "ok": True,
+                "bridge": "online",
+                "mt5": "connected",
+                "symbol": state["symbol"],
+                "timeframe": tf,
+                "candles": len(candles),
+                "tfs": list(state["candles_by_tf"].keys())
+            })
+
+        if self.path == "/mt5/order/pending":
+            state["pending_order"] = data if data else None
+            return self.send_json(200, {"ok": True, "accepted": False, "reason": "orders_disabled", "order": state.get("pending_order")})
+        if self.path == "/mt5/order/result":
+            state["last_order_result"] = data
+            return self.send_json(200, {"ok": True, "accepted": False, "reason": "orders_disabled"})
         if self.path == "/mt5/heartbeat":
             state["mt5"] = "connected"
             state["last_heartbeat"] = int(time.time())
             state["symbol"] = data.get("symbol")
             state["bid"] = data.get("bid")
             state["ask"] = data.get("ask")
+            state["balance"] = data.get("balance")
+            state["equity"] = data.get("equity")
+            state["margin"] = data.get("margin")
+            state["free_margin"] = data.get("free_margin")
+            state["profit"] = data.get("profit")
 
             return self.send_json(200, {
                 "ok": True,

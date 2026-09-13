@@ -91,8 +91,6 @@
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:background="@drawable/bg_card" android:orientation="vertical" android:padding="10dp">
                     <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="MERCADOS FAVORITOS" android:textColor="@color/blanco" android:textStyle="bold" />
                     <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:id="@+id/txtFavoritos" android:text="Esperando precio del Bridge" android:textColor="@color/gris" android:paddingTop="6dp" />
-                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="BTCUSD    0.00    0.00%" android:textColor="@color/gris" android:paddingTop="4dp" />
-                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="EURUSD    0.00    0.00%" android:textColor="@color/gris" android:paddingTop="4dp" />
                 </LinearLayout>
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:background="@drawable/bg_card" android:orientation="vertical" android:padding="12dp">
                     <TextView android:id="@+id/txtMotor" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="MOTOR IA: PAUSADO" android:textColor="@color/blanco" android:textStyle="bold" />
@@ -110,7 +108,7 @@
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:background="@drawable/bg_card" android:orientation="vertical" android:padding="10dp">
                     <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="SENAL PRINCIPAL ACTUAL" android:textColor="@color/blanco" android:textStyle="bold" />
                     <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingTop="6dp" android:text="SIN SENAL   FUERZA 0%" android:textColor="@color/gris" />
-                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingTop="4dp" android:text="POSICIONES ABIERTAS: 0  |  Ganancia flotante: 0.00" android:textColor="@color/gris" android:textSize="12sp" />
+                    <TextView android:id="@+id/txtSenalPos" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingTop="4dp" android:text="POSICIONES ABIERTAS: 0  |  Ganancia flotante: 0.00" android:textColor="@color/gris" android:textSize="12sp" />
                 </LinearLayout>
             </LinearLayout>
         </ScrollView>

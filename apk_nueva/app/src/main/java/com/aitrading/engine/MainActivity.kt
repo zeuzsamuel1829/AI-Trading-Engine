@@ -162,6 +162,7 @@ class MainActivity : AppCompatActivity() {
                             status.optJSONArray("open_positions") != null -> status.optJSONArray("open_positions").length()
                             else -> if (pr != null && pr.toString() != "null" && pr.toString() != "0") 1 else 0
                         }
+                        try { findViewById<TextView>(R.id.txtSenalPos).text = "POSICIONES ABIERTAS: $npos | Ganancia flotante: $pr" } catch (_: Exception) {}
                         findViewById<TextView>(R.id.txtDetalleInicio).text =
                             "POSICIONES ABIERTAS: $npos | Ganancia flotante: $pr"
                     } catch (_: Exception) {}
